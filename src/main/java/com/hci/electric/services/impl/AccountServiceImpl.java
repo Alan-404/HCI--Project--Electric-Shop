@@ -51,4 +51,30 @@ public class AccountServiceImpl implements AccountService {
             return null;
         }
     }
+
+    @Override
+    public Account getByUserId(String userId){
+        try{
+            Optional<Account> account = this.accountRepository.getByUserId(userId);
+            if (account.isPresent() == false)
+                return null;
+
+            return account.get();
+        }   
+        catch(Exception exception){
+            exception.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public Boolean checkPassword(String rawPassword, String encodedPassword){
+        try{
+            return this.bCryptPasswordEncoder.matches(rawPassword, encodedPassword);
+        }
+        catch(Exception exception){
+            exception.printStackTrace();
+            return false;
+        }
+    }
 }

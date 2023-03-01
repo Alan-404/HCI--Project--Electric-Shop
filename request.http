@@ -6,10 +6,19 @@ Content-Type: application/json
     "firstName": "Nguyen",
     "lastName": "tri",
     "phone": "2323",
-    "email": "gnuyentri.alan",
+    "email": "nguyentri.alan@gmail.com",
     "gender": "male",
     "address": "23",
     "birthDate": "2001-04-04",
     "password": "123456",
     "role": "admin"
+}
+
+###
+POST http://localhost:8080/account/login
+Content-Type: application/json
+
+{
+    "email": "nguyentri.alan@gmail.com",
+    "password": "123456"
 }

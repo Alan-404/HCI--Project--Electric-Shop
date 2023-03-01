@@ -10,7 +10,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LoginResponse {
-    private Boolean success;
-    private String message;
-    private String accessToken;
+    private Boolean success = false;
+    private String message = "";
+    private String accessToken = "";
 }
