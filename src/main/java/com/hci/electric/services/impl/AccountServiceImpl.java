@@ -77,4 +77,17 @@ public class AccountServiceImpl implements AccountService {
             return false;
         }
     }
+
+    @Override
+    public Account edit(Account account){
+        try{
+            account.setModifiedAt(new Timestamp(System.currentTimeMillis()));
+            account.setPassword(this.bCryptPasswordEncoder.encode(account.getPassword()));
+            return this.accountRepository.save(account);
+        }
+        catch(Exception exception){
+            exception.printStackTrace();
+            return null;
+        }
+    }
 }

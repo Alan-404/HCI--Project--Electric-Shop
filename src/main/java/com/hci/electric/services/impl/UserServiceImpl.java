@@ -47,4 +47,30 @@ public class UserServiceImpl implements UserService {
             return null;
         }
     }
+
+    @Override
+    public User getById(String id){
+        try{
+            Optional<User> user = this.userRepository.findById(id);
+            if(user.isPresent() == false){
+                return null;
+            }
+            return user.get();
+        }
+        catch(Exception exception){
+            return null;
+        }
+    }
+
+    @Override
+    public User edit(User user){
+        try{
+            user.setModifiedAt(new Timestamp(System.currentTimeMillis()));
+            return this.userRepository.save(user);
+        }
+        catch(Exception exception){
+            exception.printStackTrace();
+            return null;
+        }
+    }
 }

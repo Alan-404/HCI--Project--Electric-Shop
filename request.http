@@ -15,10 +15,39 @@ Content-Type: application/json
 }
 
 ###
-POST http://localhost:8080/account/login
+PUT http://localhost:8080/user/api
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuMnhqcWRxbmNqbjF5MjV6Z21mMiIsImlhdCI6MTY3NzczMTU0OX0.0UdiNU-qwZoWaO73isn8tfcDHkm7Z1GlI4oYGvgTOMs
+
+{
+    "firstName": "Nguyen",
+    "lastName": "Tri",
+    "phone": "2323",
+    "gender": "male",
+    "address": "23",
+    "birthDate": "2001-04-04"
+}
+
+###
+GET http://localhost:8080/user/info
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuMnhqcWRxbmNqbjF5MjV6Z21mMiIsImlhdCI6MTY3NzcyMTk1OH0.ladprmDdB_gU5wXFodbyu_X1ZkUR704zeJ6ZbepnmWY
+
+###
+POST http://localhost:8080/account/api
 Content-Type: application/json
 
 {
     "email": "nguyentri.alan@gmail.com",
-    "password": "123456"
+    "password": "123455"
+}
+
+###
+PUT http://localhost:8080/account/api
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuMnhqcWRxbmNqbjF5MjV6Z21mMiIsImlhdCI6MTY3NzcyMTk1OH0.ladprmDdB_gU5wXFodbyu_X1ZkUR704zeJ6ZbepnmWY
+
+{
+    "oldPassword": "123456",
+    "newPassword": "123455"
 }
