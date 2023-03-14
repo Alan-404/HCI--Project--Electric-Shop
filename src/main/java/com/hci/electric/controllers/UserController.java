@@ -61,7 +61,7 @@ public class UserController {
             return ResponseEntity.status(400).body(null);
         }
 
-        String accountId = this.jwt.extractUserId(accessToken.split(" ")[1]);
+        String accountId = this.jwt.extractAccountId(accessToken.split(" ")[1]);
         if(accountId == null){
             return ResponseEntity.status(400).body(null);
         }
@@ -90,7 +90,7 @@ public class UserController {
         if(accessToken.startsWith("Bearer ") == false){
             return ResponseEntity.status(400).body(null);
         }
-        String accountId = this.jwt.extractUserId(accessToken.split(" ")[1]);
+        String accountId = this.jwt.extractAccountId(accessToken.split(" ")[1]);
         if(accountId == null){
             return ResponseEntity.status(400).body(null);
         }

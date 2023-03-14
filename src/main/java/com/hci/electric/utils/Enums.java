@@ -1,14 +1,18 @@
 package com.hci.electric.utils;
 
 public class Enums {
+    public enum RoleAccount{
+        ADMIN,
+        CLIENT
+    }
     public enum StatusProduct{
-        SOCKING,
-        OUT_OF_SOCK,
-        STOP_BUSINESS
+        BUSSINESS,
+        STOP_BUSSINESS
     }
 
-    public enum TYPE_WAREHOUSE{
+    public enum TypeWarehouse{
         PLUS,
-        MINUS
+        MINUS,
+        EDIT
     }
 }

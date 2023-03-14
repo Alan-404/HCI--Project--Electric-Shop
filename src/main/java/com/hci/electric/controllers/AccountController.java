@@ -58,7 +58,7 @@ public class AccountController {
             return ResponseEntity.status(400).body(false);
         }
 
-        String accountId = this.jwt.extractUserId(accessToken.split(" ")[1]);
+        String accountId = this.jwt.extractAccountId(accessToken.split(" ")[1]);
         if(accountId == null){
             return ResponseEntity.status(400).body(false);
         }

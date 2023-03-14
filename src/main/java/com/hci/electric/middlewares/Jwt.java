@@ -35,7 +35,7 @@ public class Jwt {
                 return null;
             }
 
-            String userId = this.extractUserId(token);
+            String userId = this.extractAccountId(token);
             if (userId == null){
                 return null;
             }
@@ -47,7 +47,7 @@ public class Jwt {
         }
     }
 
-    public String extractUserId(String token){
+    public String extractAccountId(String token){
         try{
             return extractClaim(token, Claims::getSubject);
         }   
