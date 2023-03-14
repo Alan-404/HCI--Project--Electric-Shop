@@ -1,6 +1,7 @@
 package com.hci.electric.services.impl;
 
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ public class CategoryServiceImpl implements CategoryService {
     public Category save(Category category){
         try{
             category.setId(Libraries.generateId(Constants.lengthId));
+            category.setStatus(true);
             category.setCreatedAt(new Timestamp(System.currentTimeMillis()));
             category.setModifiedAt(new Timestamp(System.currentTimeMillis()));
 
@@ -57,6 +59,18 @@ public class CategoryServiceImpl implements CategoryService {
             category.setModifiedAt(new Timestamp(System.currentTimeMillis()));
 
             return this.categoryRepository.save(category);
+        }
+        catch(Exception exception){
+            exception.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public List<Category> getAll(){
+        try{
+            List<Category> categories = this.categoryRepository.findAll();
+            return categories;
         }
         catch(Exception exception){
             exception.printStackTrace();

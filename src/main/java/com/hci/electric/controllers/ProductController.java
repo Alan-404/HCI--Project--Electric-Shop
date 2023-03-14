@@ -4,6 +4,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.hci.electric.dtos.product.AddProductRequest;
 import com.hci.electric.dtos.product.AddProductResponse;
+import com.hci.electric.dtos.product.ProductDetail;
 import com.hci.electric.middlewares.Jwt;
 import com.hci.electric.models.Account;
 import com.hci.electric.models.Discount;
@@ -58,12 +61,11 @@ public class ProductController {
             return ResponseEntity.status(403).body(new AddProductResponse(false, "Forbidden", null));
         }
 
-
         Product product = this.modelMapper.map(request, Product.class);
-
+        System.out.println(product);
         Product savedProduct = this.productService.save(product);
         if(savedProduct == null){
-            return ResponseEntity.status(400).body(new AddProductResponse(false, "Cannot Save Product", null));
+            return ResponseEntity.status(500).body(new AddProductResponse(false, "Internal Error Server", null));
         }
 
         Discount discount = new Discount();
@@ -79,7 +81,34 @@ public class ProductController {
         return ResponseEntity.status(200).body(new AddProductResponse(true, "Saved Product", savedProduct));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<ProductDetail> getProductById(@PathVariable("id") String id){
+        if (id == null){
+            return ResponseEntity.status(400).body(null);
+        }
 
+        Product product = this.productService.getById(id);
+        if (product == null){
+            return ResponseEntity.status(404).body(null);
+        }
+
+        Discount discount = this.discountService.getByProductId(id);
+        if (discount == null){
+            return ResponseEntity.status(500).body(null);
+        }
+
+        Warehouse warehouse = this.warehouseService.getByProductId(id);
+        if (warehouse == null){
+            return ResponseEntity.status(500).body(null);
+        }
+
+        ProductDetail response = new ProductDetail();
+        response.setDiscount(discount);
+        response.setProduct(product);
+        response.setWarehouse(warehouse);
+
+        return ResponseEntity.status(200).body(response);
+    }
 
     
 }

@@ -84,6 +84,9 @@ public class WarehouseController {
         record.setType(type);
         record.setQuantity(request.getQuantity());
         Warehouse savedWarehouse = this.warehouseService.save(warehouse);
+        if (savedWarehouse == null){
+            return ResponseEntity.status(500).body(new EditWarehouseResponse(false, "Internel Error Server", savedWarehouse));
+        }
         this.warehouseHistoryService.save(record);
         return ResponseEntity.status(200).body(new EditWarehouseResponse(true, "Saved", savedWarehouse));
     }

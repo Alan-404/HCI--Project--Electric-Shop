@@ -51,3 +51,39 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuMnhqcWRxbmNqbjF5MjV6Z21mM
     "oldPassword": "123456",
     "newPassword": "123455"
 }
+
+###
+POST http://localhost:8080/product/api
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuMnhqcWRxbmNqbjF5MjV6Z21mMiIsImlhdCI6MTY3ODc4MzA4OX0.F8psmquIrjR2KgZn71lesXlBnRWxRIKwJFprYMoMiCc
+
+{
+    "name": "NVIDIA Jetson",
+    "description": "test api",
+    "price": "55000000.0",
+    "information": "test"
+}
+
+###
+GET http://localhost:8080/product/ezxyaxwe6zc1otnz9aq0
+Content-Type: application/json
+
+###
+POST http://localhost:8080/category/api
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuMnhqcWRxbmNqbjF5MjV6Z21mMiIsImlhdCI6MTY3ODc4MzA4OX0.F8psmquIrjR2KgZn71lesXlBnRWxRIKwJFprYMoMiCc
+
+{
+    "name": "Raspberry Pi"
+}
+
+###
+PUT http://localhost:8080/warehouse/api
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuMnhqcWRxbmNqbjF5MjV6Z21mMiIsImlhdCI6MTY3ODc4MzA4OX0.F8psmquIrjR2KgZn71lesXlBnRWxRIKwJFprYMoMiCc
+
+{
+    "productId": "ezxyaxwe6zc1otnz9aq0",
+    "quantity": 100,
+    "type": "plus"
+}

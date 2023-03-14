@@ -1,6 +1,7 @@
 package com.hci.electric.services.impl;
 
 import java.sql.Timestamp;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -28,6 +29,22 @@ public class ProductServiceImpl implements ProductService {
             product.setModifiedAt(new Timestamp(System.currentTimeMillis()));
             return this.productRepository.save(product);
         }
+        catch(Exception exception){
+            exception.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public Product getById(String id){
+        try{
+            Optional<Product> product = this.productRepository.findById(id);
+            if (product.isPresent() == false){
+                return null;
+            }
+
+            return product.get();
+        }  
         catch(Exception exception){
             exception.printStackTrace();
             return null;

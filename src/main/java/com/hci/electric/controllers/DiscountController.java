@@ -53,6 +53,10 @@ public class DiscountController {
 
         Discount savedDiscount = this.discountService.save(discount);
 
+        if (savedDiscount == null){
+            return ResponseEntity.status(500).body(new EditDiscountResponse(false, "Internal Error Server", null));
+        }
+
         return ResponseEntity.status(200).body(new EditDiscountResponse(true, "Saved Discount", savedDiscount));
 
     }

@@ -21,6 +21,7 @@ public class Category {
     @Id
     private String id;
     private String name;
+    private Boolean status;
     private Timestamp createdAt;
     private Timestamp modifiedAt;
 }

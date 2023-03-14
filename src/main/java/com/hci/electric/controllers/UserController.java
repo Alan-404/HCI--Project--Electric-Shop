@@ -100,6 +100,9 @@ public class UserController {
             return ResponseEntity.status(400).body(null);
         }
         User user = this.userService.getById(account.getUserId());
+        if(user == null){
+            return ResponseEntity.status(500).body(null);
+        }
         return ResponseEntity.status(200).body(user);
 
     }
