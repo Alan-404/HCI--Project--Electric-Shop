@@ -6,4 +6,9 @@ public class Enums {
         OUT_OF_SOCK,
         STOP_BUSINESS
     }
+
+    public enum TYPE_WAREHOUSE{
+        PLUS,
+        MINUS
+    }
 }
