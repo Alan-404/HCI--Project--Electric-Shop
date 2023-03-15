@@ -12,4 +12,10 @@ import com.hci.electric.utils.queries.CartQuery;
 public interface CartRepository extends JpaRepository<Cart, String> {
     @Query(value = CartQuery.queryGetByUserId, nativeQuery = true)
     Optional<List<Cart>> getByUserId(String userId);
+
+    @Query(value = CartQuery.queryGetByUserIdAndProductId, nativeQuery = true)
+    Optional<Cart> getByUserAndProduct(String userId, String productId);
+
+    @Query(value = CartQuery.paginateGetByUserId, nativeQuery = true)
+    Optional<List<Cart>> paginateGetByUserId(String userId, int limit, int offset);
 }

@@ -64,4 +64,51 @@ public class CartServiceImpl implements CartService {
         }
     }
     
+    @Override
+    public Cart getByUserAndProduct(String userId, String productId){
+        try{
+            Optional<Cart> item = this.cartRepository.getByUserAndProduct(userId, productId);
+            if (item.isPresent() == false){
+                return null;
+            }
+
+            return item.get();
+        }
+        catch(Exception exception){
+            exception.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public Cart getById(String id){
+        try{
+            Optional<Cart> item = this.cartRepository.findById(id);
+            if (item.isPresent() == false){
+                return null;
+            }
+
+            return item.get();
+        }
+        catch(Exception exception){
+            exception.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public List<Cart> paginateGetByUserId(String userId, int limit, int offset){
+        try{
+            Optional<List<Cart>> lstItems = this.cartRepository.paginateGetByUserId(userId, limit, offset);
+            if (lstItems.isPresent() == false){
+                return null;
+            }
+
+            return lstItems.get();
+        }  
+        catch(Exception exception){
+            exception.printStackTrace();
+            return null;
+        }
+    }
 }

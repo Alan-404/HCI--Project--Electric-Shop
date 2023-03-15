@@ -58,7 +58,7 @@ Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuMnhqcWRxbmNqbjF5MjV6Z21mMiIsImlhdCI6MTY3ODc4MzA4OX0.F8psmquIrjR2KgZn71lesXlBnRWxRIKwJFprYMoMiCc
 
 {
-    "name": "ESP 8266",
+    "name": "RAM Coiseir 8GB",
     "description": "test api",
     "price": "55000000.0",
     "information": "test"
@@ -94,11 +94,11 @@ Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuMnhqcWRxbmNqbjF5MjV6Z21mMiIsImlhdCI6MTY3ODg1MjQyMH0.5fR1uOof1P0mMUDBDreUPlNwPyPw1oU2PyDM0cka4Uw
 
 {
-    "productId": "4a0z7hkbhxifmohqauon",
+    "productId": "obwfx74hs9ctofwx1imu",
     "quantity": 2
 }
 
 ###
-GET http://localhost:8080/cart/api
+GET http://localhost:8080/cart/api?page=1&num=3
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuMnhqcWRxbmNqbjF5MjV6Z21mMiIsImlhdCI6MTY3ODg1MjQyMH0.5fR1uOof1P0mMUDBDreUPlNwPyPw1oU2PyDM0cka4Uw

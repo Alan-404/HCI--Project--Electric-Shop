@@ -10,4 +10,7 @@ public interface CartService {
     public Cart save(Cart cart);
     public Cart edit(Cart cart);
     public List<Cart> getByUserId(String userId);
+    public Cart getByUserAndProduct(String userId, String productId);
+    public Cart getById(String id);
+    public List<Cart> paginateGetByUserId(String userId, int limit, int offset);
 }
