@@ -9,7 +9,6 @@ import com.hci.electric.models.Product;
 import com.hci.electric.repositories.ProductRepository;
 import com.hci.electric.services.ProductService;
 import com.hci.electric.utils.Constants;
-import com.hci.electric.utils.Enums;
 import com.hci.electric.utils.Libraries;
 
 @Service
@@ -24,7 +23,7 @@ public class ProductServiceImpl implements ProductService {
     public Product save(Product product){
         try{
             product.setId(Libraries.generateId(Constants.lengthId));
-            product.setStatus(Enums.StatusProduct.BUSSINESS.toString());
+            product.setStatus(true);
             product.setCreatedAt(new Timestamp(System.currentTimeMillis()));
             product.setModifiedAt(new Timestamp(System.currentTimeMillis()));
             return this.productRepository.save(product);

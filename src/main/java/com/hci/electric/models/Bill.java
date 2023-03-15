@@ -11,20 +11,17 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "PRODUCT")
-public class Product {
+@Table(name = "BILL")
+public class Bill {
     @Id
     private String id;
-    private String name;
-    private String description;
+    private String userId;
+    private Timestamp orderTime;
     private Double price;
-    private boolean status;
-    private String information;
-    private Timestamp createdAt;
-    private Timestamp modifiedAt;
 }

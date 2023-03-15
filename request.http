@@ -31,7 +31,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuMnhqcWRxbmNqbjF5MjV6Z21mM
 ###
 GET http://localhost:8080/user/info
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuMnhqcWRxbmNqbjF5MjV6Z21mMiIsImlhdCI6MTY3NzcyMTk1OH0.ladprmDdB_gU5wXFodbyu_X1ZkUR704zeJ6ZbepnmWY
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuMnhqcWRxbmNqbjF5MjV6Z21mMiIsImlhdCI6MTY3ODg1MjU1MH0.WqNvbwFbg8yu7fJJsmpWG_kWD_z1BLgAPWhhcYYvxxs
 
 ###
 POST http://localhost:8080/account/api
@@ -58,7 +58,7 @@ Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuMnhqcWRxbmNqbjF5MjV6Z21mMiIsImlhdCI6MTY3ODc4MzA4OX0.F8psmquIrjR2KgZn71lesXlBnRWxRIKwJFprYMoMiCc
 
 {
-    "name": "NVIDIA Jetson",
+    "name": "ESP 8266",
     "description": "test api",
     "price": "55000000.0",
     "information": "test"
@@ -87,3 +87,18 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuMnhqcWRxbmNqbjF5MjV6Z21mM
     "quantity": 100,
     "type": "plus"
 }
+
+###
+POST http://localhost:8080/cart/add
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuMnhqcWRxbmNqbjF5MjV6Z21mMiIsImlhdCI6MTY3ODg1MjQyMH0.5fR1uOof1P0mMUDBDreUPlNwPyPw1oU2PyDM0cka4Uw
+
+{
+    "productId": "4a0z7hkbhxifmohqauon",
+    "quantity": 2
+}
+
+###
+GET http://localhost:8080/cart/api
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuMnhqcWRxbmNqbjF5MjV6Z21mMiIsImlhdCI6MTY3ODg1MjQyMH0.5fR1uOof1P0mMUDBDreUPlNwPyPw1oU2PyDM0cka4Uw
