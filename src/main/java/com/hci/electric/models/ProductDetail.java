@@ -17,13 +17,13 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "ACCOUNT")
-public class Account {
+@Table(name = "PRODUCT_DETAIL")
+public class ProductDetail {
     @Id
     private String id;
-    private String userId;
-    private String password;
-    private Boolean status;
-    private String role;
+    private String productId;
+    private int color;
+    private int specifications;
+    private String image;
     private Timestamp modifiedAt;
 }

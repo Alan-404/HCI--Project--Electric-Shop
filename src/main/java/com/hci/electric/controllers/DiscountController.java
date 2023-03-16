@@ -58,6 +58,5 @@ public class DiscountController {
         }
 
         return ResponseEntity.status(200).body(new EditDiscountResponse(true, "Saved Discount", savedDiscount));
-
     }
 }

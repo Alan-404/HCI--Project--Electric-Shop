@@ -77,4 +77,22 @@ public class CategoryServiceImpl implements CategoryService {
             return null;
         }
     }
+
+    @Override
+    public boolean checkListCategories(List<String> categories){
+        try{
+            boolean result = true;
+            for (String category : categories) {
+                if (this.getById(category) == null){
+                    result = false;
+                }
+            }
+
+            return result;
+        }
+        catch(Exception exception){
+            exception.printStackTrace();
+            return false;
+        }
+    }
 }

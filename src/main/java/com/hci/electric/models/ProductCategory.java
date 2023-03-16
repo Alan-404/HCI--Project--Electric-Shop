@@ -24,4 +24,9 @@ public class ProductCategory {
     private Integer id;
     private String productId;
     private String categoryId;
+
+    public ProductCategory(String productId, String categoryId){
+        this.productId = productId;
+        this.categoryId = categoryId;
+    }
 }

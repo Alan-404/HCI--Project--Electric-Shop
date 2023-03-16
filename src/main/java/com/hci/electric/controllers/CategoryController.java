@@ -78,7 +78,5 @@ public class CategoryController {
         }
 
         return ResponseEntity.status(200).body(new HandleCategoryResponse(true, "Edited Category", savedCategory));
-    }
-
-    
+    }   
 }

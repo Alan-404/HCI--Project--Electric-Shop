@@ -9,4 +9,5 @@ public interface CategoryService {
     public Category getById(String id);
     public Category edit(Category category);
     public List<Category> getAll();
+    public boolean checkListCategories(List<String> categories);
 }
