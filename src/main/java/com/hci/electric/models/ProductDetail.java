@@ -25,5 +25,6 @@ public class ProductDetail {
     private int color;
     private int specifications;
     private String image;
+    private boolean status;
     private Timestamp modifiedAt;
 }

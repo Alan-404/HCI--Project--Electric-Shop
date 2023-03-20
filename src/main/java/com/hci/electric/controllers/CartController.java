@@ -69,7 +69,7 @@ public class CartController {
         }
 
         Product product = this.productService.getById(cart.getProductId());
-        if (product == null || product.isStatus() == false){
+        if (product == null){
             return ResponseEntity.status(404).body(new HandleCartResponse(false, "Product has been discontinued", null));
         }
 

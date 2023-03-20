@@ -23,7 +23,7 @@ public class ProductServiceImpl implements ProductService {
     public Product save(Product product){
         try{
             product.setId(Libraries.generateId(Constants.lengthId));
-            product.setStatus(true);
+        
             product.setCreatedAt(new Timestamp(System.currentTimeMillis()));
             product.setModifiedAt(new Timestamp(System.currentTimeMillis()));
             return this.productRepository.save(product);
