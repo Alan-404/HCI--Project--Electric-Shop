@@ -1,5 +1,9 @@
 package com.hci.electric.services.impl;
 
+import java.sql.Timestamp;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 
 import com.hci.electric.models.ProductDetail;
@@ -20,7 +24,25 @@ public class ProductDetailServiceImpl implements ProductDetailService {
     public ProductDetail save(ProductDetail product){
         try{
             product.setId(Libraries.generateId(Constants.lengthId));
+            product.setStatus(true);
+            product.setModifiedAt(new Timestamp(System.currentTimeMillis()));
             return this.productDetailRepository.save(product);
+        }
+        catch(Exception exception){
+            exception.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public List<ProductDetail> getByProductId(String id){
+        try{
+            Optional<List<ProductDetail>> products = this.productDetailRepository.getByProductId(id);
+            if (products.isPresent() == false){
+                return null;
+            }
+
+            return products.get();
         }
         catch(Exception exception){
             exception.printStackTrace();

@@ -22,7 +22,6 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
-    private String userId;
     private String productId;
     private String billId;
     private double productPrice;

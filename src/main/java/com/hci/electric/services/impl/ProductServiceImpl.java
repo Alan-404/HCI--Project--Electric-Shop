@@ -1,6 +1,7 @@
 package com.hci.electric.services.impl;
 
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -44,6 +45,33 @@ public class ProductServiceImpl implements ProductService {
 
             return product.get();
         }  
+        catch(Exception exception){
+            exception.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public List<Product> getAll(){
+        try{    
+            return this.productRepository.findAll();
+        }
+        catch(Exception exception){
+            exception.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public List<Product> paginate(int num, int page){
+        try{
+            Optional<List<Product>> products = this.productRepository.paginate(num, (page-1)*num);
+            if (products.isPresent() == false){
+                return null;
+            }
+
+            return products.get();
+        }
         catch(Exception exception){
             exception.printStackTrace();
             return null;

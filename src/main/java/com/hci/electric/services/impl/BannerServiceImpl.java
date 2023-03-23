@@ -1,5 +1,7 @@
 package com.hci.electric.services.impl;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.hci.electric.models.Banner;
@@ -22,6 +24,29 @@ public class BannerServiceImpl implements BannerService {
         catch(Exception exception){
             exception.printStackTrace();
             return null;
+        }
+    }
+
+    @Override
+    public List<Banner> getAll(){
+        try{
+            return this.bannerRepository.findAll();
+        }
+        catch(Exception exception){
+            exception.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public boolean delete(Banner banner){
+        try{
+            this.bannerRepository.delete(banner);
+            return true;
+        }
+        catch(Exception exception){
+            exception.printStackTrace();
+            return false;
         }
     }
 }

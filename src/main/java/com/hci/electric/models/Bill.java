@@ -24,4 +24,5 @@ public class Bill {
     private String userId;
     private Timestamp orderTime;
     private Double price;
+    private String status;
 }

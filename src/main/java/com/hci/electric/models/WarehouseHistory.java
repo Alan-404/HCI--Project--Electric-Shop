@@ -21,7 +21,7 @@ import lombok.Setter;
 @Table(name = "WAREHOUSE_HISTORY")
 public class WarehouseHistory {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private Integer warehouseId;
     private Integer quantity;

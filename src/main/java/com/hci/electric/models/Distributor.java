@@ -22,6 +22,8 @@ public class Distributor {
     @Id
     private String id;
     private String name;
+    private String userId;
+    private String phone;
     private Timestamp createdAt;
     private Timestamp modifiedAt;
 }

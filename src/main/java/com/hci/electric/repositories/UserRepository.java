@@ -11,4 +11,7 @@ import com.hci.electric.utils.queries.UserQuery;
 public interface UserRepository extends JpaRepository<User, String> {
     @Query(value = UserQuery.queryByEmail, nativeQuery = true)
     Optional<User> getUserByEmail(String email);
+
+    @Query(value = UserQuery.queryGetByPhone, nativeQuery = true)
+    Optional<User> getByPhone(String phone);
 }

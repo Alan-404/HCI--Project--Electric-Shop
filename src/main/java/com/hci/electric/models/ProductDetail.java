@@ -23,8 +23,8 @@ public class ProductDetail {
     private String id;
     private String productId;
     private int color;
-    private int specifications;
-    private String image;
+    private String specifications;
+    private Double price;
     private boolean status;
     private Timestamp modifiedAt;
 }

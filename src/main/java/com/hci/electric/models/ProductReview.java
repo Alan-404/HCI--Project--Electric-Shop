@@ -21,8 +21,6 @@ import lombok.Setter;
 public class ProductReview {
     @Id
     private String id;
-    private String productId;
-    private String userId;
     private String orderId;
     private String content;
     private int stars;

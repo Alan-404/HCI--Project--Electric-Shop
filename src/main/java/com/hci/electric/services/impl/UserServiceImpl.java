@@ -73,4 +73,19 @@ public class UserServiceImpl implements UserService {
             return null;
         }
     }
+
+    @Override
+    public User getByPhone(String phone){
+        try{
+            Optional<User> user = this.userRepository.getByPhone(phone);
+            if(user.isPresent() == false){
+                return null;
+            }
+            return user.get();
+        }
+        catch(Exception exception){
+            exception.printStackTrace();
+            return null;
+        }
+    }
 }

@@ -11,17 +11,17 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-
-@Setter
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "PRODUCT_DISTRIBUTOR")
-public class ProductDistributor {
+@Table(name = "PRODUCT_IMAGE")
+public class ProductImage {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String productId;
-    private String distributorId;
+    private String link;
+    private boolean main;
 }

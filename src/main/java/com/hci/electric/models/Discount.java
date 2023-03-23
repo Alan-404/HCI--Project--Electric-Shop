@@ -22,7 +22,7 @@ import lombok.Setter;
 @Table(name = "DISCOUNT")
 public class Discount {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String productId;
     private Double value;

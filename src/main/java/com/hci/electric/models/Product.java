@@ -23,6 +23,7 @@ public class Product {
     private String name;
     private String description;
     private String information;
+    private String distributorId;
     private Timestamp createdAt;
     private Timestamp modifiedAt;
 }

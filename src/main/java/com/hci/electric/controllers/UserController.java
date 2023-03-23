@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.hci.electric.dtos.user.EditUserRequest;
 import com.hci.electric.dtos.user.RegisterRequest;
+import com.hci.electric.dtos.user.RegisterResponse;
 import com.hci.electric.middlewares.Jwt;
 import com.hci.electric.models.Account;
 import com.hci.electric.models.User;
@@ -36,22 +37,33 @@ public class UserController {
     }
 
     @PostMapping("/api")
-    public ResponseEntity<User> register(@RequestBody RegisterRequest request){
+    public ResponseEntity<RegisterResponse> register(@RequestBody RegisterRequest request){
+        String email = request.getEmail();
+        if (this.userService.getByEmail(email) != null){
+            return ResponseEntity.status(400).body(new RegisterResponse(false, "Email has been taken", null));
+        }
+
+        if (request.getPhone() != null){
+            if (this.userService.getByPhone(request.getPhone()) != null){
+                return ResponseEntity.status(400).body(new RegisterResponse(false, "Phone Number has been used", null));
+            } 
+        }
+
         User user = this.modelMapper.map(request, User.class);
         Account account = this.modelMapper.map(request, Account.class);
 
         User savedUser = this.userService.save(user);
         if(savedUser == null){
-            return ResponseEntity.status(500).body(null);
+            return ResponseEntity.status(500).body(new RegisterResponse(false, "Internal Error Server", null));
         }
 
         account.setUserId(savedUser.getId());
         Account savedAccount = this.accountService.save(account);
         if(savedAccount == null){
-            return ResponseEntity.status(500).body(null);
+            return ResponseEntity.status(500).body(new RegisterResponse(false, "Internal Error Server", null));
         }
 
-        return ResponseEntity.status(200).body(savedUser);
+        return ResponseEntity.status(200).body(new RegisterResponse(true, "Register User Successfully", savedUser));
     }
 
     @PutMapping("/api")

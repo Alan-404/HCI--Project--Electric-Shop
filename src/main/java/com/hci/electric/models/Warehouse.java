@@ -19,7 +19,7 @@ import lombok.Setter;
 @Table(name = "WAREHOUSE")
 public class Warehouse {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String productId;
     private Integer quantity;

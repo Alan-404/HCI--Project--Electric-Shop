@@ -1,17 +1,35 @@
+Register User
 ###
 POST http://localhost:8080/user/api
 Content-Type: application/json
 
 {
-    "firstName": "Nguyen",
-    "lastName": "tri",
-    "phone": "2323",
+    "firstName": "Nguyễn",
+    "lastName": "Trí",
+    "phone": "0938671192",
     "email": "nguyentri.alan@gmail.com",
     "gender": "male",
     "address": "23",
     "birthDate": "2001-04-04",
     "password": "123456",
     "role": "admin"
+}
+
+
+###
+POST http://localhost:8080/user/api
+Content-Type: application/json
+
+{
+    "firstName": "Vy",
+    "lastName": "Hoa",
+    "phone": "0938671215",
+    "email": "hoa@gmail.com",
+    "gender": "male",
+    "address": "23",
+    "birthDate": "2001-04-04",
+    "password": "123456",
+    "role": "client"
 }
 
 ###
@@ -28,18 +46,70 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuMnhqcWRxbmNqbjF5MjV6Z21mM
     "birthDate": "2001-04-04"
 }
 
+
+###
+PUT http://localhost:8080/product/api
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuMnhqcWRxbmNqbjF5MjV6Z21mMiIsImlhdCI6MTY3NzczMTU0OX0.0UdiNU-qwZoWaO73isn8tfcDHkm7Z1GlI4oYGvgTOMs
+
+{
+    "firstName": "Nguyen",
+    "lastName": "Tri",
+    "phone": "2323",
+    "gender": "male",
+    "address": "23",
+    "birthDate": "2001-04-04"
+}
 ###
 GET http://localhost:8080/user/info
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuMnhqcWRxbmNqbjF5MjV6Z21mMiIsImlhdCI6MTY3ODg1MjU1MH0.WqNvbwFbg8yu7fJJsmpWG_kWD_z1BLgAPWhhcYYvxxs
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJiNjZybjRpeDNleDdzamtzMnkweCIsImlhdCI6MTY3OTU0OTEyN30.Y3f-e_wxyxG3MaO2q3kvQ3uyyYIhUCeajce9UDQ1Tl4
 
 ###
 POST http://localhost:8080/account/api
 Content-Type: application/json
 
 {
-    "email": "nguyentri.alan@gmail.com",
-    "password": "123455"
+    "email": "hoa@gmail.com",
+    "password": "123456"
+}
+
+###
+POST http://localhost:8080/distributor/api
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJiNjZybjRpeDNleDdzamtzMnkweCIsImlhdCI6MTY3OTU0OTUwMn0.XwUvQnWst619E8xH3MYn7DS7Qtpn2wzEhliFkSpGH_Y
+
+{
+    "phone": "0902323232",
+    "name": "FShop"
+}
+
+###
+POST http://localhost:8080/detail/add
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJiNjZybjRpeDNleDdzamtzMnkweCIsImlhdCI6MTY3OTU0OTUwMn0.XwUvQnWst619E8xH3MYn7DS7Qtpn2wzEhliFkSpGH_Y
+
+{
+    "productId": "6vj0x1jwq3fjzqd0z0ju",
+    "products": [
+        {
+            "color": 1,
+            "specifications": "SSD 250GB 8GB RAM",
+            "price": "200000"
+        },
+        {
+            "color": 2,
+            "specifications": "SSD 250GB 8GB RAM",
+            "price": "200000"
+        },
+        {
+            "color": 3,
+            "specifications": "SSD 250B 8GB RAM",
+            "price": "200000"
+        }
+    ],
+    "quantities": [100, 103, 29],
+    "discounts": [10, 10, 10]
 }
 
 ###
@@ -55,17 +125,16 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuMnhqcWRxbmNqbjF5MjV6Z21mM
 ###
 POST http://localhost:8080/product/api
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuMnhqcWRxbmNqbjF5MjV6Z21mMiIsImlhdCI6MTY3ODc4MzA4OX0.F8psmquIrjR2KgZn71lesXlBnRWxRIKwJFprYMoMiCc
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJiNjZybjRpeDNleDdzamtzMnkweCIsImlhdCI6MTY3OTU1MDI3Mn0.22xdK4tglKU7a8V11ll2m8rOgu6LTmM2ECqznRyErOA
 
 {
-    "name": "RAM Coiseir 8GB",
+    "name": "Laptop ASUS Tuf F15",
     "description": "test api",
-    "price": "55000000.0",
     "information": "test"
 }
 
 ###
-GET http://localhost:8080/product/ezxyaxwe6zc1otnz9aq0
+GET http://localhost:8080/product/6vj0x1jwq3fjzqd0z0ju
 Content-Type: application/json
 
 ###
