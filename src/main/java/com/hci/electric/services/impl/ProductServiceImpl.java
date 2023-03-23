@@ -77,4 +77,16 @@ public class ProductServiceImpl implements ProductService {
             return null;
         }
     }
+
+    @Override
+    public Product edit(Product product){
+        try{
+            product.setModifiedAt(new Timestamp(System.currentTimeMillis()));
+            return this.productRepository.save(product);
+        }
+        catch(Exception exception){
+            exception.printStackTrace();
+            return null;
+        }
+    }
 }

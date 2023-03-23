@@ -49,4 +49,20 @@ public class ProductDetailServiceImpl implements ProductDetailService {
             return null;
         }
     }
+
+    @Override
+    public ProductDetail getById(String id){
+        try{
+            Optional<ProductDetail> product = this.productDetailRepository.findById(id);
+            if (product.isPresent() == false){
+                return null;
+            }
+
+            return product.get();
+        }
+        catch(Exception exception){
+            exception.printStackTrace();
+            return null;
+        }
+    }
 }

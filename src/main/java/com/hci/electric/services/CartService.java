@@ -13,4 +13,5 @@ public interface CartService {
     public Cart getByUserAndProduct(String userId, String productId);
     public Cart getById(String id);
     public List<Cart> paginateGetByUserId(String userId, int limit, int offset);
+    public boolean delete(Cart cart);
 }

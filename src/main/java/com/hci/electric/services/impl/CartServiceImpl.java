@@ -111,4 +111,16 @@ public class CartServiceImpl implements CartService {
             return null;
         }
     }
+
+    @Override
+    public boolean delete(Cart cart){
+        try{
+            this.cartRepository.delete(cart);
+            return true;
+        }
+        catch(Exception exception){
+            exception.printStackTrace();
+            return false;
+        }
+    }
 }

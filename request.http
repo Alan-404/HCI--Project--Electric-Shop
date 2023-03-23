@@ -70,7 +70,7 @@ POST http://localhost:8080/account/api
 Content-Type: application/json
 
 {
-    "email": "hoa@gmail.com",
+    "email": "nguyentri.alan@gmail.com",
     "password": "123456"
 }
 
@@ -160,12 +160,25 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuMnhqcWRxbmNqbjF5MjV6Z21mM
 ###
 POST http://localhost:8080/cart/add
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuMnhqcWRxbmNqbjF5MjV6Z21mMiIsImlhdCI6MTY3ODg1MjQyMH0.5fR1uOof1P0mMUDBDreUPlNwPyPw1oU2PyDM0cka4Uw
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuemZ6dTc2YTFlNXk1Z20xMm8zaCIsImlhdCI6MTY3OTU4Mjg0NX0.IGsZ0mhkuepqDuHSla3k2j9js7hH0MGuqv0PA9EO8f0
 
 {
-    "productId": "obwfx74hs9ctofwx1imu",
+    "productId": "67jjgaeie3ncu2youvjd",
     "quantity": 2
 }
+
+###
+POST http://localhost:8080/category/api
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuemZ6dTc2YTFlNXk1Z20xMm8zaCIsImlhdCI6MTY3OTU4MTMyM30._Xx8JNrL9osHWQGW8JVs_4OcWFYXzPF8kxxEAOUoHdg
+
+{
+    "name": ""
+}
+
+###
+GET http://localhost:8080/category/api?page=1&num=5
+Content-Type: application/json
 
 ###
 GET http://localhost:8080/cart/api?page=1&num=3

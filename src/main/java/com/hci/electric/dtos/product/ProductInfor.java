@@ -1,7 +1,10 @@
 package com.hci.electric.dtos.product;
 
+import java.util.List;
+
 import com.hci.electric.models.Discount;
 import com.hci.electric.models.Product;
+import com.hci.electric.models.ProductDetail;
 import com.hci.electric.models.Warehouse;
 
 import lombok.AllArgsConstructor;
@@ -9,13 +12,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductDetail {
+public class ProductInfor {
     private Product product;
-    private Discount discount;
-    private Warehouse warehouse;
+    private List<ProductDetail> items;
+    private List<Discount> discounts;
+    private List<Warehouse> warehouses;
 }

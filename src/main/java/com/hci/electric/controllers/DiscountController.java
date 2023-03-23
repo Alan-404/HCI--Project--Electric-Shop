@@ -14,7 +14,6 @@ import com.hci.electric.models.Account;
 import com.hci.electric.models.Discount;
 import com.hci.electric.services.AccountService;
 import com.hci.electric.services.DiscountService;
-import com.hci.electric.utils.Enums;
 
 @RestController
 @RequestMapping("/discount")
@@ -42,7 +41,7 @@ public class DiscountController {
         }
 
         Account account = this.accountService.getById(accountId);
-        if (account == null || account.getRole().equals(Enums.RoleAccount.ADMIN.toString().toLowerCase()) == false){
+        if (account == null){
             return ResponseEntity.status(403).body(new EditDiscountResponse(false, "Forbidden", null));
         }
 

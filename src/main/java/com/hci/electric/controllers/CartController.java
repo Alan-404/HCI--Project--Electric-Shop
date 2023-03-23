@@ -22,10 +22,11 @@ import com.hci.electric.dtos.cart.PaginationCartItems;
 import com.hci.electric.middlewares.Jwt;
 import com.hci.electric.models.Account;
 import com.hci.electric.models.Cart;
-import com.hci.electric.models.Product;
+import com.hci.electric.models.ProductDetail;
 import com.hci.electric.models.Warehouse;
 import com.hci.electric.services.AccountService;
 import com.hci.electric.services.CartService;
+import com.hci.electric.services.ProductDetailService;
 import com.hci.electric.services.ProductService;
 import com.hci.electric.services.WarehouseService;
 
@@ -39,10 +40,12 @@ public class CartController {
     private final AccountService accountService;
     private final WarehouseService warehouseService;
     private final ProductService productService;
+    private final ProductDetailService productDetailService;
 
-    public CartController(CartService cartService, AccountService accountService, WarehouseService warehouseService, ProductService productService){
+    public CartController(CartService cartService, AccountService accountService, WarehouseService warehouseService, ProductService productService, ProductDetailService productDetailService){
         this.cartService = cartService;
         this.modelMapper = new ModelMapper();
+        this.productDetailService = productDetailService;
         this.accountService = accountService;
         this.warehouseService = warehouseService;
         this.productService = productService;
@@ -68,7 +71,7 @@ public class CartController {
             return ResponseEntity.status(404).body(new HandleCartResponse(false, "Not Found User", null));
         }
 
-        Product product = this.productService.getById(cart.getProductId());
+        ProductDetail product = this.productDetailService.getById(cart.getProductId());
         if (product == null){
             return ResponseEntity.status(404).body(new HandleCartResponse(false, "Product has been discontinued", null));
         }

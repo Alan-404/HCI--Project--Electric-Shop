@@ -10,4 +10,5 @@ public interface CategoryService {
     public Category edit(Category category);
     public List<Category> getAll();
     public boolean checkListCategories(List<String> categories);
+    public List<Category> paginate(int num, int page);
 }

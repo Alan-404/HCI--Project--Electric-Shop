@@ -1,12 +1,16 @@
 package com.hci.electric.controllers;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hci.electric.dtos.category.HandleCategoryResponse;
@@ -78,5 +82,21 @@ public class CategoryController {
         }
 
         return ResponseEntity.status(200).body(new HandleCategoryResponse(true, "Edited Category", savedCategory));
-    }   
+    }
+    
+    @GetMapping("/api")
+    public List<Category> getAll(@RequestParam(name = "num", required = false) Integer num, @RequestParam(name = "page", required = false) Integer page){
+        if (num == null){
+            num = this.categoryService.getAll().size();
+        }
+
+        if (page == null){
+            page = 1;
+        }
+
+        List<Category> categories = this.categoryService.paginate(num, page);
+        return categories;
+    }
+
+
 }

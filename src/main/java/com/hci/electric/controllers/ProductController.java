@@ -1,5 +1,6 @@
 package com.hci.electric.controllers;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -9,13 +10,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hci.electric.dtos.product.AddProductRequest;
 import com.hci.electric.dtos.product.AddProductResponse;
-
+import com.hci.electric.dtos.product.ProductInfor;
 import com.hci.electric.middlewares.Jwt;
 import com.hci.electric.models.Account;
 import com.hci.electric.models.Discount;
@@ -82,21 +84,11 @@ public class ProductController {
             return ResponseEntity.status(500).body(new AddProductResponse(false, "Internal Error Server", null));
         }
 
-        /* Discount discount = new Discount();
-        discount.setProductId(savedProduct.getId());
-        discount.setValue(0.0);
-        this.discountService.save(discount);
-
-        Warehouse warehouse = new Warehouse();
-        warehouse.setProductId(savedProduct.getId());
-        warehouse.setQuantity(0);
-        this.warehouseService.save(warehouse); */
-
         return ResponseEntity.status(200).body(new AddProductResponse(true, "Saved Product", savedProduct));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<List<ProductDetail>> getProductById(@PathVariable("id") String id){
+    public ResponseEntity<ProductInfor> getProductById(@PathVariable("id") String id){
         if (id == null){
             return ResponseEntity.status(400).body(null);
         }
@@ -106,26 +98,66 @@ public class ProductController {
             return ResponseEntity.status(404).body(null);
         }
 
-       /*  Discount discount = this.discountService.getByProductId(id);
-        if (discount == null){
-            return ResponseEntity.status(500).body(null);
-        }
-
-        Warehouse warehouse = this.warehouseService.getByProductId(id);
-        if (warehouse == null){
-            return ResponseEntity.status(500).body(null);
-        } */
-
         List<ProductDetail> items = this.productDetailService.getByProductId(id);
         if (items == null){
             return ResponseEntity.status(404).body(null);
         }
 
 
-        return ResponseEntity.status(200).body(items);
+        ProductInfor response = new ProductInfor();
+
+        response.setProduct(product);
+        response.setItems(items);
+
+        List<Discount> lstDiscounts = new ArrayList<>();
+        List<Warehouse> lstWarehouse = new ArrayList<>();
+
+        for (ProductDetail item : items) {
+            lstDiscounts.add(this.discountService.getByProductId(item.getId()));
+            lstWarehouse.add(this.warehouseService.getByProductId(item.getId()));
+        }
+
+        response.setDiscounts(lstDiscounts);
+        response.setWarehouses(lstWarehouse);
+
+        return ResponseEntity.status(200).body(response);
     }
 
-/*     @GetMapping("/api")
-    public ResponseEntity<> */
+    @PutMapping("/api")
+    public ResponseEntity<AddProductResponse> editProduct(@RequestBody Product product, HttpServletRequest httpServletRequest){
+        String token = httpServletRequest.getHeader("Authorization");
+        if (token.startsWith("Bearer ") == false){
+            return ResponseEntity.status(400).body(new AddProductResponse(false, "Invalid Token", null));
+        }
+
+        String accountId = this.jwt.extractAccountId(token.split(" ")[1]);
+        if (accountId == null){
+            return ResponseEntity.status(400).body(new AddProductResponse(false, "Invalid Token", null));
+        }
+
+        Account account = this.accountService.getById(accountId);
+        if (account == null){
+            return ResponseEntity.status(400).body(new AddProductResponse(false, "Invalid User", null));
+        }
+
+        Distributor distributor = this.distributorService.getByUserId(account.getUserId());
+        if (distributor == null){
+            return ResponseEntity.status(400).body(new AddProductResponse(false, "You are not Distributor", null));
+        }
+
+        Product checkProduct = this.productService.getById(product.getId());
+        if (checkProduct == null || checkProduct.getDistributorId().equals(distributor.getId()) == false){
+            return ResponseEntity.status(400).body(new AddProductResponse(false, "You are not Owner of Product", null));
+        }
+
+        product.setCreatedAt(checkProduct.getCreatedAt());
+
+        Product savedProduct = this.productService.edit(product);
+        if (savedProduct == null){
+            return ResponseEntity.status(500).body(new AddProductResponse(false, "Internal Error Server", null));
+        }
+
+        return ResponseEntity.status(200).body(new AddProductResponse(true, "Edit Product Successfully", savedProduct));
+    }
     
 }

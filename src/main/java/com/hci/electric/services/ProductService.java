@@ -9,4 +9,5 @@ public interface ProductService {
     public Product getById(String id);
     public List<Product> getAll();
     public List<Product> paginate(int num, int page);
+    public Product edit(Product product);
 }

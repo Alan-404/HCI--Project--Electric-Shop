@@ -57,7 +57,6 @@ public class CategoryServiceImpl implements CategoryService {
     public Category edit(Category category){
         try{
             category.setModifiedAt(new Timestamp(System.currentTimeMillis()));
-
             return this.categoryRepository.save(category);
         }
         catch(Exception exception){
@@ -93,6 +92,22 @@ public class CategoryServiceImpl implements CategoryService {
         catch(Exception exception){
             exception.printStackTrace();
             return false;
+        }
+    }
+
+    @Override
+    public List<Category> paginate(int num, int page){
+        try{
+            Optional<List<Category>> lst = this.categoryRepository.paginate(num, (page-1)*num);
+            if (lst.isPresent() == false){
+                return null;
+            }
+
+            return lst.get();
+        }
+        catch(Exception exception){
+            exception.printStackTrace();
+            return null;
         }
     }
 }
