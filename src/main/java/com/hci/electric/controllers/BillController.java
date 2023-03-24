@@ -1,5 +1,7 @@
 package com.hci.electric.controllers;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.ResponseEntity;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.hci.electric.middlewares.Jwt;
 import com.hci.electric.models.Account;
 import com.hci.electric.models.Bill;
+import com.hci.electric.models.Order;
 import com.hci.electric.services.AccountService;
 import com.hci.electric.services.BillService;
 import com.hci.electric.services.OrderService;
@@ -51,6 +54,10 @@ public class BillController {
         if (bill.getUserId().equals(account.getUserId()) == false){
             return ResponseEntity.status(403).body(null);
         } 
+
+        List<Order> items = this.orderService.getByBillId(bill.getId());
+
+
 
         return ResponseEntity.status(200).body(bill);
     }
