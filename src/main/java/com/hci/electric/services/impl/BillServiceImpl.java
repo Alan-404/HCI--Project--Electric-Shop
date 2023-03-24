@@ -1,5 +1,6 @@
 package com.hci.electric.services.impl;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,6 +26,7 @@ public class BillServiceImpl implements BillService {
     public Bill save(Bill bill){
         try{
             bill.setId(Libraries.generateId(Constants.lengthId));
+            bill.setOrderTime(new Timestamp(System.currentTimeMillis()));
             return this.billRepository.save(bill);
         }
         catch(Exception exception){

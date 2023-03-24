@@ -42,4 +42,15 @@ public class WarehouseServiceImpl implements WarehouseService {
             return null;
         }
     }
+
+    @Override
+    public Warehouse edit(Warehouse warehouse){
+        try{
+            return this.warehouseRepository.save(warehouse);
+        }
+        catch(Exception exception){
+            exception.printStackTrace();
+            return null;
+        }
+    }
 }

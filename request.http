@@ -163,8 +163,8 @@ Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuemZ6dTc2YTFlNXk1Z20xMm8zaCIsImlhdCI6MTY3OTU4Mjg0NX0.IGsZ0mhkuepqDuHSla3k2j9js7hH0MGuqv0PA9EO8f0
 
 {
-    "productId": "67jjgaeie3ncu2youvjd",
-    "quantity": 2
+    "productId": "6hmez9zidottukc2tdwo",
+    "quantity": 5
 }
 
 ###
@@ -179,6 +179,31 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuemZ6dTc2YTFlNXk1Z20xMm8za
 ###
 GET http://localhost:8080/category/api?page=1&num=5
 Content-Type: application/json
+
+###
+PUT http://localhost:8080/cart/status/0yvmgcp058ed6lslpw5p
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuemZ6dTc2YTFlNXk1Z20xMm8zaCIsImlhdCI6MTY3OTYzMDAzMH0.A9UgqJ-a25UxC43jCx4mdA2vN0j4zaj1OF23WHqAESU
+
+
+###
+PUT http://localhost:8080/cart/all?status=1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuemZ6dTc2YTFlNXk1Z20xMm8zaCIsImlhdCI6MTY3OTYzMDAzMH0.A9UgqJ-a25UxC43jCx4mdA2vN0j4zaj1OF23WHqAESU
+###
+POST http://localhost:8080/order/add
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuemZ6dTc2YTFlNXk1Z20xMm8zaCIsImlhdCI6MTY3OTYzMDAzMH0.A9UgqJ-a25UxC43jCx4mdA2vN0j4zaj1OF23WHqAESU
+
+{
+    "paymentType": "CASH",
+    "status": "COMPREHENSIVE"
+}
+###
+GET http://localhost:8080/bill/c82yknvofavfqw02o5r2
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuemZ6dTc2YTFlNXk1Z20xMm8zaCIsImlhdCI6MTY3OTYzMDAzMH0.A9UgqJ-a25UxC43jCx4mdA2vN0j4zaj1OF23WHqAESU
+
 
 ###
 GET http://localhost:8080/cart/api?page=1&num=3

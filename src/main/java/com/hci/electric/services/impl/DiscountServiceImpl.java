@@ -21,6 +21,7 @@ public class DiscountServiceImpl implements DiscountService {
     public Discount save(Discount discount){
         try{
             discount.setModifiedAt(new Timestamp(System.currentTimeMillis()));
+            discount.setStatus(true);
             return this.discountRepository.save(discount);
         }
         catch(Exception exception){

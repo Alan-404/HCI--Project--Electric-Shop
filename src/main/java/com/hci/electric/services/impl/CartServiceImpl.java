@@ -123,4 +123,49 @@ public class CartServiceImpl implements CartService {
             return false;
         }
     }
+
+    @Override
+    public boolean updateStatusCarts(List<Cart> items, boolean status){
+        try{
+            for (Cart cart : items) {
+                cart.setStatus(status);
+            }
+
+            this.cartRepository.saveAll(items);
+
+            return true;
+        }
+        catch(Exception exception){
+            exception.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
+    public List<Cart> getByUserIdAndStatus(String userId, boolean status){
+        try{
+            Optional<List<Cart>> items = this.cartRepository.getByUserIdAndStatus(userId, status);
+            if (items.isPresent() == false){
+                return null;
+            }
+            return items.get();
+        }
+        catch(Exception exception){
+            exception.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public boolean deleteCarts(List<Cart> items){
+        try{
+            this.cartRepository.deleteAll(items);
+
+            return true;
+        }
+        catch(Exception exception){
+            exception.printStackTrace();
+            return false;
+        }
+    }
 }

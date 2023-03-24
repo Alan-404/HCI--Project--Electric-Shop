@@ -152,8 +152,10 @@ public class CartController {
         }
 
         Cart item = this.cartService.getById(cartId);
+        if (item == null || item.getUserId().equals(account.getUserId()) == false){
+            return ResponseEntity.status(403).body(new HandleCartResponse(false, "Invalid User", null));
+        }
         item.setStatus(!(item.isStatus()));
-
         Cart savedCart = this.cartService.edit(item);
 
         if (savedCart == null){
@@ -209,5 +211,30 @@ public class CartController {
         }
 
         return ResponseEntity.status(200).body(new PaginationCartItems(items, totalPages, totalItems));
+    }
+
+    @PutMapping("/all")
+    public ResponseEntity<Boolean> updateAllCarts(HttpServletRequest httpServletRequest, @RequestParam("status") boolean status){
+        String token = httpServletRequest.getHeader("Authorization");
+        if (token.startsWith("Bearer ") == false){
+            return ResponseEntity.status(400).body(false);
+        }
+
+        String accountId = this.jwt.extractAccountId(token.split(" ")[1]);
+        if (accountId == null){
+            return ResponseEntity.status(400).body(false);
+        }
+
+        Account account = this.accountService.getById(accountId);
+        if (account == null){
+            return ResponseEntity.status(400).body(false);
+        }
+
+        List<Cart> items = this.cartService.getByUserId(account.getUserId());
+        boolean savedItems = this.cartService.updateStatusCarts(items, status);
+        if (savedItems == false){
+            return ResponseEntity.status(500).body(false);
+        }
+        return ResponseEntity.status(200).body(true);
     }
 }

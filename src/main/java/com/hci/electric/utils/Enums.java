@@ -16,5 +16,18 @@ public class Enums {
         EDIT
     }
 
+    public enum PaymentType{
+        CASH,
+        VN_PAY,
+    }
+
+    public enum BillStatus{
+        CONFIRMED,
+        PREPARING,
+        DELIVERING,
+        COMPREHENSIVE,
+        CANCELED
+    }
+
     
 }

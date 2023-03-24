@@ -26,5 +26,6 @@ public class Discount {
     private Integer id;
     private String productId;
     private Double value;
+    private boolean status;
     private Timestamp modifiedAt;
 }

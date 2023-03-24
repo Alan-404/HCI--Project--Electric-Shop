@@ -14,4 +14,7 @@ public interface CartService {
     public Cart getById(String id);
     public List<Cart> paginateGetByUserId(String userId, int limit, int offset);
     public boolean delete(Cart cart);
+    public boolean updateStatusCarts(List<Cart> items, boolean status);
+    public List<Cart> getByUserIdAndStatus(String userId, boolean status);
+    public boolean deleteCarts(List<Cart> items);
 }

@@ -18,4 +18,7 @@ public interface CartRepository extends JpaRepository<Cart, String> {
 
     @Query(value = CartQuery.paginateGetByUserId, nativeQuery = true)
     Optional<List<Cart>> paginateGetByUserId(String userId, int limit, int offset);
+
+    @Query(value = CartQuery.queryCartsByUserIdAndStatus, nativeQuery = true)
+    Optional<List<Cart>> getByUserIdAndStatus (String userId, boolean status);
 }
