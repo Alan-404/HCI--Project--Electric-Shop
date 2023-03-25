@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hci.electric.dtos.distributor.RegisterResponse;
-import com.hci.electric.middlewares.Jwt;
+import com.hci.electric.middlewares.Auth;
 import com.hci.electric.models.Account;
 import com.hci.electric.models.Distributor;
 import com.hci.electric.services.AccountService;
@@ -21,22 +21,20 @@ import com.hci.electric.services.UserService;
 public class DistributorController {
     private final DistributorService distributorService;
     private final AccountService accountService;
-    private final Jwt jwt;
+
+    private final Auth auth;
 
     public DistributorController(DistributorService distributorService, AccountService accountService, UserService userService){
         this.distributorService = distributorService;
         this.accountService = accountService;
-        this.jwt = new Jwt();
+        this.auth = new Auth(this.accountService);
     }
 
     @PostMapping("/api")
     public ResponseEntity<RegisterResponse> register(@RequestBody Distributor distributor, HttpServletRequest httpServletRequest){
         String token = httpServletRequest.getHeader("Authorization");
-        String accountId = this.jwt.extractAccountId(token.split(" ")[1]);
-        if (accountId == null){
-            return ResponseEntity.status(400).body(new RegisterResponse(false, "Invalid Token", null));
-        }
-        Account account = this.accountService.getById(accountId);
+
+        Account account = this.auth.checkToken(token);
         if (account == null){
             return ResponseEntity.status(400).body(new RegisterResponse(false, "You must have registered User before registering as Distributor", null));
         }

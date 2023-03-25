@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.hci.electric.dtos.product.AddProductRequest;
 import com.hci.electric.dtos.product.AddProductResponse;
 import com.hci.electric.dtos.product.ProductInfor;
-import com.hci.electric.middlewares.Jwt;
+import com.hci.electric.middlewares.Auth;
 import com.hci.electric.models.Account;
 import com.hci.electric.models.Discount;
 import com.hci.electric.models.Distributor;
@@ -36,13 +36,13 @@ import com.hci.electric.services.WarehouseService;
 @RequestMapping("/product")
 public class ProductController {
     private final ProductService productService;
-    private final Jwt jwt;
     private final AccountService accountService;
     private final DistributorService distributorService;
     private final ModelMapper modelMapper;
     private final DiscountService discountService;
     private final WarehouseService warehouseService;
     private final ProductDetailService productDetailService;
+    private final Auth auth;
 
     public ProductController(ProductService productService, AccountService accountService, DiscountService discountService, WarehouseService warehouseService, DistributorService distributorService, ProductDetailService productDetailService){
         this.productService = productService;
@@ -51,23 +51,16 @@ public class ProductController {
         this.discountService = discountService;
         this.distributorService = distributorService;
         this.warehouseService = warehouseService;
-        this.jwt = new Jwt();
         this.modelMapper = new ModelMapper();
+
+        this.auth = new Auth(this.accountService);
     }
 
     @PostMapping("/api")
     public ResponseEntity<AddProductResponse> addProduct(@RequestBody AddProductRequest request, HttpServletRequest httpServletRequest){
         String accessToken = httpServletRequest.getHeader("Authorization");
-        if (accessToken.startsWith("Bearer ") == false){
-            return ResponseEntity.status(400).body(new AddProductResponse(false, "Invalid Token", null));
-        }
-
-        String accountId = this.jwt.extractAccountId(accessToken.split(" ")[1]);
-        if(accountId == null){
-            return ResponseEntity.status(400).body(new AddProductResponse(false, "Invalid Token", null));
-        }
-
-        Account account = this.accountService.getById(accountId);
+        
+        Account account = this.auth.checkToken(accessToken);
         if (account == null){
             return ResponseEntity.status(403).body(new AddProductResponse(false, "Forbidden", null));
         }
@@ -126,16 +119,8 @@ public class ProductController {
     @PutMapping("/api")
     public ResponseEntity<AddProductResponse> editProduct(@RequestBody Product product, HttpServletRequest httpServletRequest){
         String token = httpServletRequest.getHeader("Authorization");
-        if (token.startsWith("Bearer ") == false){
-            return ResponseEntity.status(400).body(new AddProductResponse(false, "Invalid Token", null));
-        }
-
-        String accountId = this.jwt.extractAccountId(token.split(" ")[1]);
-        if (accountId == null){
-            return ResponseEntity.status(400).body(new AddProductResponse(false, "Invalid Token", null));
-        }
-
-        Account account = this.accountService.getById(accountId);
+        
+        Account account = this.auth.checkToken(token);
         if (account == null){
             return ResponseEntity.status(400).body(new AddProductResponse(false, "Invalid User", null));
         }

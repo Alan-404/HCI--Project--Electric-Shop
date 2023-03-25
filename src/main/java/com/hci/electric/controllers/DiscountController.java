@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hci.electric.dtos.discount.EditDiscountResponse;
-import com.hci.electric.middlewares.Jwt;
+import com.hci.electric.middlewares.Auth;
 import com.hci.electric.models.Account;
 import com.hci.electric.models.Discount;
 import com.hci.electric.services.AccountService;
@@ -19,28 +19,22 @@ import com.hci.electric.services.DiscountService;
 @RequestMapping("/discount")
 public class DiscountController {
     private final DiscountService discountService;
-    private final Jwt jwt;
+
     private final AccountService accountService;
+
+    private Auth auth;
 
     public DiscountController(DiscountService discountService, AccountService accountService){
         this.discountService = discountService;
         this.accountService = accountService;
-        this.jwt = new Jwt();
+
+        this.auth = new Auth(this.accountService);
     }
 
     @PutMapping("/api")
     public ResponseEntity<EditDiscountResponse> editDiscount(@RequestBody Discount request, HttpServletRequest httpServletRequest){
         String accessToken = httpServletRequest.getHeader("Authorization");
-        if (accessToken.startsWith("Bearer ") == false){
-            return ResponseEntity.status(400).body(new EditDiscountResponse(false, "Invalid Token", null));
-        }
-
-        String accountId = this.jwt.extractAccountId(accessToken.split(" ")[1]);
-        if (accountId == null){
-            return ResponseEntity.status(400).body(new EditDiscountResponse(false, "Invalid Token", null));
-        }
-
-        Account account = this.accountService.getById(accountId);
+        Account account = this.auth.checkToken(accessToken);
         if (account == null){
             return ResponseEntity.status(403).body(new EditDiscountResponse(false, "Forbidden", null));
         }

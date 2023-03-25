@@ -206,6 +206,12 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuemZ6dTc2YTFlNXk1Z20xMm8za
 
 
 ###
+GET http://localhost:8080/bill/teu40d2rkd968dgo0yql
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuemZ6dTc2YTFlNXk1Z20xMm8zaCIsImlhdCI6MTY3OTYzMDAzMH0.A9UgqJ-a25UxC43jCx4mdA2vN0j4zaj1OF23WHqAESU
+
+
+###
 GET http://localhost:8080/cart/api?page=1&num=3
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuMnhqcWRxbmNqbjF5MjV6Z21mMiIsImlhdCI6MTY3ODg1MjQyMH0.5fR1uOof1P0mMUDBDreUPlNwPyPw1oU2PyDM0cka4Uw

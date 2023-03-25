@@ -6,14 +6,16 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hci.electric.dtos.order.CreateOrderRequest;
 import com.hci.electric.dtos.order.CreateOrderResponse;
-import com.hci.electric.middlewares.Jwt;
+import com.hci.electric.middlewares.Auth;
 import com.hci.electric.models.Account;
 import com.hci.electric.models.Bill;
 import com.hci.electric.models.Cart;
@@ -44,7 +46,7 @@ public class OrderController {
     private final WarehouseHistoryService history;
     private final DiscountService discountService;
     private final AccountService accountService;
-    private final Jwt jwt;
+    private final Auth auth;
 
     public OrderController(OrderService orderService, CartService cartService, BillService billService, AccountService accountService, DiscountService discountService, WarehouseService warehouseService, ProductDetailService productDetailService, WarehouseHistoryService history){
         this.cartService = cartService;
@@ -55,7 +57,8 @@ public class OrderController {
         this.warehouseService = warehouseService;
         this.discountService = discountService;
         this.history = history;
-        this.jwt = new Jwt();
+
+        this.auth = new Auth(this.accountService);
     }
 
     public void warehouseHandle(Warehouse warehouse, int quantityGotten){
@@ -72,16 +75,8 @@ public class OrderController {
     @PostMapping("/add")
     public ResponseEntity<CreateOrderResponse> createOrder(HttpServletRequest httpServletRequest, @RequestBody CreateOrderRequest request){
         String token = httpServletRequest.getHeader("Authorization");
-        if (token.startsWith("Bearer ") == false){
-            return ResponseEntity.status(400).body(new CreateOrderResponse(false, "Invalid Token", null));
-        }
 
-        String accountId = this.jwt.extractAccountId(token.split(" ")[1]);
-        if (accountId == null){
-            return ResponseEntity.status(400).body(new CreateOrderResponse(false, "Invalid Token", null));
-        }
-
-        Account account = this.accountService.getById(accountId);
+        Account account = this.auth.checkToken(token);
         if (account == null){
             return ResponseEntity.status(404).body(new CreateOrderResponse(false, "Invalid Token", null));
         }
@@ -140,5 +135,16 @@ public class OrderController {
         this.cartService.deleteCarts(items);
 
         return ResponseEntity.status(200).body(new CreateOrderResponse(true, "Create Order Successfully", bill));
+    }
+
+
+    @GetMapping("/review")
+    public ResponseEntity<List<Order>> getOrderItemByReviewedStatus(HttpServletRequest httpServletRequest, @RequestParam("status") boolean status){
+        String token = httpServletRequest.getHeader("Authorization");
+        if (token == null || token.startsWith("Bearer ") == false){
+            return ResponseEntity.status(400).body(null);
+        }
+
+        return null;
     }
 }

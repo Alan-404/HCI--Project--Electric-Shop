@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.hci.electric.dtos.cart.CartItem;
 import com.hci.electric.dtos.cart.HandleCartResponse;
 import com.hci.electric.dtos.cart.PaginationCartItems;
-import com.hci.electric.middlewares.Jwt;
+import com.hci.electric.middlewares.Auth;
 import com.hci.electric.models.Account;
 import com.hci.electric.models.Cart;
 import com.hci.electric.models.ProductDetail;
@@ -35,12 +35,13 @@ import com.hci.electric.services.WarehouseService;
 @RequestMapping("/cart")
 public class CartController {
     private final CartService cartService;
-    private final Jwt jwt;
     private final ModelMapper modelMapper;
     private final AccountService accountService;
     private final WarehouseService warehouseService;
     private final ProductService productService;
     private final ProductDetailService productDetailService;
+
+    private final Auth auth;
 
     public CartController(CartService cartService, AccountService accountService, WarehouseService warehouseService, ProductService productService, ProductDetailService productDetailService){
         this.cartService = cartService;
@@ -49,26 +50,17 @@ public class CartController {
         this.accountService = accountService;
         this.warehouseService = warehouseService;
         this.productService = productService;
-        this.jwt = new Jwt();
+
+        this.auth = new Auth(this.accountService);
     }
 
     @PostMapping("/add")
     public ResponseEntity<HandleCartResponse> addProduct(@RequestBody Cart cart, HttpServletRequest httpServletRequest){
         String accessToken = httpServletRequest.getHeader("Authorization");
-        System.out.println(accessToken);
-        if (accessToken.startsWith("Bearer ") == false){
-            return ResponseEntity.status(400).body(new HandleCartResponse(false, "Invalid Token", null));
-        }
 
-        String accountId = this.jwt.extractAccountId(accessToken.split(" ")[1]);
-
-        if (accountId == null){
-            return ResponseEntity.status(400).body(new HandleCartResponse(false, "Invalid Token", null));
-        }
-
-        Account account = this.accountService.getById(accountId);
+        Account account = this.auth.checkToken(accessToken);
         if (account == null){
-            return ResponseEntity.status(404).body(new HandleCartResponse(false, "Not Found User", null));
+            return ResponseEntity.status(404).body(new HandleCartResponse(false, "Invalid Token", null));
         }
 
         ProductDetail product = this.productDetailService.getById(cart.getProductId());
@@ -105,18 +97,9 @@ public class CartController {
     @PutMapping("/handle")
     public ResponseEntity<HandleCartResponse> handleProductCart(HttpServletRequest httpServletRequest, @RequestBody Cart cart){
         String accessToken = httpServletRequest.getHeader("Authorization");
-        if (accessToken.startsWith("Bearer ") == false){
-            return ResponseEntity.status(400).body(new HandleCartResponse(false, "Invalid Token", null));
-        }
-
-        String accountId = this.jwt.extractAccountId(accessToken.split(" ")[1]);
-        if (accountId == null){
-            return ResponseEntity.status(400).body(new HandleCartResponse(false, "Invalid Token", null));
-        }
-
-        Account account = this.accountService.getById(accountId);
+        Account account = this.auth.checkToken(accessToken);
         if (account == null || account.getStatus() == false){
-            return ResponseEntity.status(404).body(new HandleCartResponse(false, "User Not Found", null));
+            return ResponseEntity.status(404).body(new HandleCartResponse(false, "Invalid Token", null));
         }
 
         cart.setUserId(account.getUserId());
@@ -137,16 +120,7 @@ public class CartController {
     @PutMapping("/status/{id}")
     public ResponseEntity<HandleCartResponse> changeStatusItem(HttpServletRequest httpServletRequest, @PathVariable("id") String cartId){
         String accessToken = httpServletRequest.getHeader("Authorization");
-        if (accessToken.startsWith("Bearer ") == false){
-            return ResponseEntity.status(400).body(new HandleCartResponse(false, "Invalid Token", null));
-        }
-
-        String accountId = this.jwt.extractAccountId(accessToken.split(" ")[1]);
-        if (accountId == null){
-            return ResponseEntity.status(400).body(new HandleCartResponse(false, "Invalid Token", null));
-        }
-
-        Account account = this.accountService.getById(accountId);
+        Account account = this.auth.checkToken(accessToken);
         if (account == null || account.getStatus() == false){
             return ResponseEntity.status(404).body(new HandleCartResponse(false, "Not Found User", null));
         }
@@ -168,16 +142,8 @@ public class CartController {
     @GetMapping("/api")
     public ResponseEntity<PaginationCartItems> getCartByToken(HttpServletRequest httpServletRequest, @RequestParam(name = "num", required = false) Integer num, @RequestParam(name = "page", required = false) Integer page){
         String accessToken = httpServletRequest.getHeader("Authorization");
-        if (accessToken.startsWith("Bearer ") == false){
-            return ResponseEntity.status(400).body(new PaginationCartItems(new ArrayList<>(), 0, 0));
-        }
+        Account account = this.auth.checkToken(accessToken);
 
-        String accountId = this.jwt.extractAccountId(accessToken.split(" ")[1]);
-        if (accountId == null){
-            return ResponseEntity.status(400).body(new PaginationCartItems(new ArrayList<>(), 0, 0));
-        }
-
-        Account account = this.accountService.getById(accountId);
         if (account == null || account.getStatus() == false){
             return ResponseEntity.status(404).body(new PaginationCartItems(new ArrayList<>(), 0, 0));
         }
@@ -216,16 +182,7 @@ public class CartController {
     @PutMapping("/all")
     public ResponseEntity<Boolean> updateAllCarts(HttpServletRequest httpServletRequest, @RequestParam("status") boolean status){
         String token = httpServletRequest.getHeader("Authorization");
-        if (token.startsWith("Bearer ") == false){
-            return ResponseEntity.status(400).body(false);
-        }
-
-        String accountId = this.jwt.extractAccountId(token.split(" ")[1]);
-        if (accountId == null){
-            return ResponseEntity.status(400).body(false);
-        }
-
-        Account account = this.accountService.getById(accountId);
+        Account account = this.auth.checkToken(token);
         if (account == null){
             return ResponseEntity.status(400).body(false);
         }

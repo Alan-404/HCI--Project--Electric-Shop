@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.hci.electric.dtos.user.EditUserRequest;
 import com.hci.electric.dtos.user.RegisterRequest;
 import com.hci.electric.dtos.user.RegisterResponse;
-import com.hci.electric.middlewares.Jwt;
+import com.hci.electric.middlewares.Auth;
 import com.hci.electric.models.Account;
 import com.hci.electric.models.User;
 import com.hci.electric.services.AccountService;
@@ -26,13 +26,15 @@ public class UserController {
     private final UserService userService;
     private final AccountService accountService;
     private final ModelMapper modelMapper;
-    private final Jwt jwt;
+
+    private final Auth auth;
 
     public UserController(UserService userService, AccountService accountService){
         this.userService = userService;
         this.accountService = accountService;
         this.modelMapper = new ModelMapper();
-        this.jwt = new Jwt();
+
+        this.auth = new Auth(this.accountService);
 
     }
 
@@ -69,16 +71,8 @@ public class UserController {
     @PutMapping("/api")
     public ResponseEntity<User> edit(HttpServletRequest httpServletRequest, @RequestBody EditUserRequest request){
         String accessToken = httpServletRequest.getHeader("Authorization");
-        if(accessToken.startsWith("Bearer ") == false){
-            return ResponseEntity.status(400).body(null);
-        }
-
-        String accountId = this.jwt.extractAccountId(accessToken.split(" ")[1]);
-        if(accountId == null){
-            return ResponseEntity.status(400).body(null);
-        }
-
-        Account account = this.accountService.getById(accountId);
+        
+        Account account = this.auth.checkToken(accessToken);
         if(account == null){
             return ResponseEntity.status(400).body(null);
         }
@@ -99,15 +93,8 @@ public class UserController {
     @GetMapping("/info")
     public ResponseEntity<User> getByToken(HttpServletRequest httpServletRequest){
         String accessToken = httpServletRequest.getHeader("Authorization");
-        if(accessToken.startsWith("Bearer ") == false){
-            return ResponseEntity.status(400).body(null);
-        }
-        String accountId = this.jwt.extractAccountId(accessToken.split(" ")[1]);
-        if(accountId == null){
-            return ResponseEntity.status(400).body(null);
-        }
-
-        Account account = this.accountService.getById(accountId);
+        
+        Account account = this.auth.checkToken(accessToken);
         if(account == null){
             return ResponseEntity.status(400).body(null);
         }

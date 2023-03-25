@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.hci.electric.dtos.warehouse.EditQuantityWarehouseRequest;
 import com.hci.electric.dtos.warehouse.EditWarehouseResponse;
-import com.hci.electric.middlewares.Jwt;
+import com.hci.electric.middlewares.Auth;
 import com.hci.electric.models.Account;
 import com.hci.electric.models.Warehouse;
 import com.hci.electric.models.WarehouseHistory;
@@ -24,29 +24,23 @@ import com.hci.electric.utils.Enums;
 public class WarehouseController {
     private final WarehouseService warehouseService;
     private final WarehouseHistoryService warehouseHistoryService;
-    private final Jwt jwt;
     private final AccountService accountService;
+
+    private final Auth auth;
 
     public WarehouseController(WarehouseService warehouseService, WarehouseHistoryService warehouseHistoryService, AccountService accountService){
         this.warehouseHistoryService = warehouseHistoryService;
         this.warehouseService = warehouseService;
         this.accountService = accountService;
-        this.jwt = new Jwt();
+
+        this.auth = new Auth(this.accountService);
     }
 
     @PutMapping("/api")
     public ResponseEntity<EditWarehouseResponse> editQuantityWarehouse(@RequestBody EditQuantityWarehouseRequest request, HttpServletRequest httpServletRequest){
         String accessToken = httpServletRequest.getHeader("Authorization");
-        if(accessToken.startsWith("Bearer ") == false){
-            return ResponseEntity.status(400).body(new EditWarehouseResponse(false, "Invalid Token", null));
-        }
-
-        String accountId = this.jwt.extractAccountId(accessToken.split(" ")[1]);
-        if (accountId == null){
-            return ResponseEntity.status(400).body(new EditWarehouseResponse(false, "Invalid Token", null));
-        }
-
-        Account account = this.accountService.getById(accountId);
+        
+        Account account = this.auth.checkToken(accessToken);
         if (account == null || account.getRole().equals(Enums.RoleAccount.ADMIN.toString().toLowerCase()) == false){
             return ResponseEntity.status(403).body(new EditWarehouseResponse(false, "Forbidden", null));
         }

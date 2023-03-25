@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.hci.electric.dtos.account.ChangePasswordRequest;
 import com.hci.electric.dtos.account.LoginRequest;
 import com.hci.electric.dtos.account.LoginResponse;
+import com.hci.electric.middlewares.Auth;
 import com.hci.electric.middlewares.Jwt;
 import com.hci.electric.models.Account;
 import com.hci.electric.models.User;
@@ -24,11 +25,14 @@ public class AccountController {
     private final UserService userService;
     private final AccountService accountService;
     private final Jwt jwt;
+    private final Auth auth;
 
     public AccountController(AccountService accountService, UserService userService){
         this.accountService = accountService;
         this.userService = userService;
         this.jwt = new Jwt();
+
+        this.auth = new Auth(this.accountService);
     }
 
     @PostMapping("/api")
@@ -54,17 +58,8 @@ public class AccountController {
     @PutMapping("/api")
     public ResponseEntity<Boolean> changePassword(HttpServletRequest httpServletRequest, @RequestBody ChangePasswordRequest request){
         String accessToken = httpServletRequest.getHeader("Authorization");
-        if(accessToken.startsWith("Bearer ") == false){
-            return ResponseEntity.status(400).body(false);
-        }
-
-        String accountId = this.jwt.extractAccountId(accessToken.split(" ")[1]);
-        if(accountId == null){
-            return ResponseEntity.status(400).body(false);
-        }
-
-        Account account = this.accountService.getById(accountId);
-        if(account == null){
+        Account account = this.auth.checkToken(accessToken);
+        if (account == null){
             return ResponseEntity.status(400).body(false);
         }
 

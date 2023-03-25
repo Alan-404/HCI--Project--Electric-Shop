@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 import com.hci.electric.dtos.productDetail.AddProductRequest;
-import com.hci.electric.middlewares.Jwt;
+import com.hci.electric.middlewares.Auth;
 import com.hci.electric.models.Account;
 import com.hci.electric.models.Discount;
 import com.hci.electric.models.Distributor;
@@ -33,7 +33,8 @@ public class ProductDetailController {
     private final DiscountService discountService;
     private final WarehouseService warehouseService;
     private final ProductService productService;
-    private final Jwt jwt;
+
+    private final Auth auth;
 
     public ProductDetailController(ProductDetailService productDetailService, AccountService accountService, DistributorService distributorService, DiscountService discountService, WarehouseService warehouseService, ProductService productService){
         this.productDetailService = productDetailService;
@@ -42,24 +43,16 @@ public class ProductDetailController {
         this.discountService = discountService;
         this.warehouseService = warehouseService;
         this.distributorService = distributorService;
-        this.jwt = new Jwt();
+
+        this.auth = new Auth(this.accountService);
     }
 
     @PostMapping("/add")
     public ResponseEntity<Product> addDetailOfProducts(@RequestBody AddProductRequest request, HttpServletRequest httpServletRequest){
-        System.out.println(request.getProductId());
         
         String token = httpServletRequest.getHeader("Authorization");
-        if (token.startsWith("Bearer ") == false){
-            return ResponseEntity.status(400).body(null);
-        }
 
-        String accountId = this.jwt.extractAccountId(token.split(" ")[1]);
-        if (accountId == null){
-            return ResponseEntity.status(400).body(null);
-        }
-
-        Account account = this.accountService.getById(accountId);
+        Account account = this.auth.checkToken(token);
         if (account == null){
             return ResponseEntity.status(400).body(null);
         }
