@@ -127,7 +127,7 @@ public class OrderController {
             order.setQuantity(items.get(i).getQuantity());
             order.setProductPrice(productPrice.get(i));
 
-            this.orderService.saveRecord(order);
+            this.orderService.saveRecord(order, false);
 
             this.warehouseHandle(warehouses.get(i), items.get(i).getQuantity());
         }
@@ -139,12 +139,21 @@ public class OrderController {
 
 
     @GetMapping("/review")
-    public ResponseEntity<List<Order>> getOrderItemByReviewedStatus(HttpServletRequest httpServletRequest, @RequestParam("status") boolean status){
+    public ResponseEntity<List<Order>> getOrderItemByReviewedStatus(HttpServletRequest httpServletRequest,@RequestParam("reviewed") boolean reviewed,  @RequestParam("status") String status){
         String token = httpServletRequest.getHeader("Authorization");
-        if (token == null || token.startsWith("Bearer ") == false){
-            return ResponseEntity.status(400).body(null);
+        status = status.toUpperCase();
+        Account account = this.auth.checkToken(token);
+        if (account == null){
+            return ResponseEntity.status(400).body(new ArrayList<>());
         }
 
-        return null;
+        List<Bill> statusBill = this.billService.getByUserIdAndStatus(account.getUserId(), status);
+        List<Order> orders = new ArrayList<>();
+        for (Bill bill : statusBill) {
+            List<Order> ordersStatus = this.orderService.getByBillAndReviewedStatus(bill.getId(), reviewed);
+            orders.addAll(ordersStatus);
+        }   
+
+        return ResponseEntity.status(200).body(orders);
     }
 }

@@ -11,19 +11,19 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "PRODUCT_REVIEW")
-public class ProductReview {
+@Table(name = "COMMENT")
+public class Comment {
     @Id
     private String id;
     private String userId;
     private String productId;
     private String content;
-    private int stars;
+    private String reply;
     private Timestamp createdAt;
+    private Timestamp modifiedAt;   
 }

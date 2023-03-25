@@ -49,4 +49,21 @@ public class DistributorServiceImpl implements DistributorService {
             return null;
         }
     }
+
+    @Override
+    public Distributor getById(String id){
+        try{
+            Optional<Distributor> distributor = this.distributorRepository.findById(id);
+            if (distributor.isPresent() == false){
+                return null;
+            }
+
+            return distributor.get();
+        }
+        catch(Exception exception){
+            exception.printStackTrace();
+            return null;
+        }
+    }
+
 }

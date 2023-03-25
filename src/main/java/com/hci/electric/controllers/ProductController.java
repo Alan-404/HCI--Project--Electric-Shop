@@ -22,13 +22,17 @@ import com.hci.electric.middlewares.Auth;
 import com.hci.electric.models.Account;
 import com.hci.electric.models.Discount;
 import com.hci.electric.models.Distributor;
+import com.hci.electric.models.Order;
 import com.hci.electric.models.Product;
 import com.hci.electric.models.ProductDetail;
+import com.hci.electric.models.ProductReview;
 import com.hci.electric.models.Warehouse;
 import com.hci.electric.services.AccountService;
 import com.hci.electric.services.DiscountService;
 import com.hci.electric.services.DistributorService;
+import com.hci.electric.services.OrderService;
 import com.hci.electric.services.ProductDetailService;
+import com.hci.electric.services.ProductReviewService;
 import com.hci.electric.services.ProductService;
 import com.hci.electric.services.WarehouseService;
 
@@ -42,15 +46,19 @@ public class ProductController {
     private final DiscountService discountService;
     private final WarehouseService warehouseService;
     private final ProductDetailService productDetailService;
+    private final OrderService orderService;
+    private final ProductReviewService productReviewService;
     private final Auth auth;
 
-    public ProductController(ProductService productService, AccountService accountService, DiscountService discountService, WarehouseService warehouseService, DistributorService distributorService, ProductDetailService productDetailService){
+    public ProductController(ProductService productService, AccountService accountService, DiscountService discountService, WarehouseService warehouseService, DistributorService distributorService, ProductDetailService productDetailService, OrderService orderService, ProductReviewService productReviewService){
         this.productService = productService;
         this.accountService = accountService;
+        this.orderService = orderService;
         this.productDetailService = productDetailService;
         this.discountService = discountService;
         this.distributorService = distributorService;
         this.warehouseService = warehouseService;
+        this.productReviewService = productReviewService;
         this.modelMapper = new ModelMapper();
 
         this.auth = new Auth(this.accountService);
@@ -99,6 +107,9 @@ public class ProductController {
 
         ProductInfor response = new ProductInfor();
 
+        Distributor distributor = this.distributorService.getById(product.getDistributorId());
+        response.setDistributor(distributor);
+
         response.setProduct(product);
         response.setItems(items);
 
@@ -110,8 +121,30 @@ public class ProductController {
             lstWarehouse.add(this.warehouseService.getByProductId(item.getId()));
         }
 
+        List<ProductDetail> subProducts = this.productDetailService.getByProductId(id);
+        int purchases = 0;
+        double star = 0;
+
+        
+        for (ProductDetail subProduct : subProducts) {
+            List<Order> orders = this.orderService.getByProductId(subProduct.getId());
+            if (orders == null || orders.size() == 0){
+                continue;
+            }
+
+            purchases += orders.stream().mapToInt(o -> o.getQuantity()).sum();
+            
+
+        }
+
+        List<ProductReview> reviews = this.productReviewService.getByProduct(id);
+        star += reviews.stream().mapToDouble(o -> o.getStars()).sum();
+
         response.setDiscounts(lstDiscounts);
         response.setWarehouses(lstWarehouse);
+        response.setPurchases(purchases);
+        response.setReviews(reviews.size());
+        response.setStar(Double.valueOf(star/(reviews.size())));
 
         return ResponseEntity.status(200).body(response);
     }

@@ -12,4 +12,7 @@ import com.hci.electric.utils.queries.BillQuery;
 public interface BillRepository extends JpaRepository<Bill, String> {
     @Query(value = BillQuery.queryGetBiilsByUser, nativeQuery = true)
     public Optional<List<Bill>> getByUserId(String userId);
+
+    @Query(value = BillQuery.queryGetBillsByUserAndStatus, nativeQuery = true)
+    public Optional<List<Bill>> getByUserAndStatus(String userId, String status);
 }

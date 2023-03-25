@@ -70,7 +70,7 @@ POST http://localhost:8080/account/api
 Content-Type: application/json
 
 {
-    "email": "nguyentri.alan@gmail.com",
+    "email": "hoa@gmail.com",
     "password": "123456"
 }
 
@@ -90,22 +90,22 @@ Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJiNjZybjRpeDNleDdzamtzMnkweCIsImlhdCI6MTY3OTU0OTUwMn0.XwUvQnWst619E8xH3MYn7DS7Qtpn2wzEhliFkSpGH_Y
 
 {
-    "productId": "6vj0x1jwq3fjzqd0z0ju",
+    "productId": "sv2boa4h87kaneczfsb2",
     "products": [
         {
-            "color": 1,
-            "specifications": "SSD 250GB 8GB RAM",
-            "price": "200000"
+            "color": 0,
+            "specifications": "2GB RAM",
+            "price": "2500000"
         },
         {
-            "color": 2,
-            "specifications": "SSD 250GB 8GB RAM",
-            "price": "200000"
+            "color": 0,
+            "specifications": "4GB RAM",
+            "price": "3000000"
         },
         {
-            "color": 3,
-            "specifications": "SSD 250B 8GB RAM",
-            "price": "200000"
+            "color": 0,
+            "specifications": "16GB RAM",
+            "price": "3200000"
         }
     ],
     "quantities": [100, 103, 29],
@@ -128,13 +128,17 @@ Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJiNjZybjRpeDNleDdzamtzMnkweCIsImlhdCI6MTY3OTU1MDI3Mn0.22xdK4tglKU7a8V11ll2m8rOgu6LTmM2ECqznRyErOA
 
 {
-    "name": "Laptop ASUS Tuf F15",
-    "description": "test api",
-    "information": "test"
+    "name": "Raspberry Pi 4 Model B",
+    "description": "Raspberry Pi Foundation lại tiếp tục làm người dùng bất ngờ khi tung ra phiên bản Raspberry Pi 4 8GB hoàn toàn mới, không lâu sau khi dừng sản xuất phiên bản 1GB RAM",
+    "information": "Test"
 }
 
 ###
 GET http://localhost:8080/product/6vj0x1jwq3fjzqd0z0ju
+Content-Type: application/json
+
+###
+GET http://localhost:8080/review/product?id=6vj0x1jwq3fjzqd0z0ju
 Content-Type: application/json
 
 ###
@@ -210,8 +214,46 @@ GET http://localhost:8080/bill/teu40d2rkd968dgo0yql
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuemZ6dTc2YTFlNXk1Z20xMm8zaCIsImlhdCI6MTY3OTYzMDAzMH0.A9UgqJ-a25UxC43jCx4mdA2vN0j4zaj1OF23WHqAESU
 
+###
+GET http://localhost:8080/order/review?reviewed=0&status=COMPREHENSIVE
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuemZ6dTc2YTFlNXk1Z20xMm8zaCIsImlhdCI6MTY3OTYzMDAzMH0.A9UgqJ-a25UxC43jCx4mdA2vN0j4zaj1OF23WHqAESU
 
 ###
 GET http://localhost:8080/cart/api?page=1&num=3
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuMnhqcWRxbmNqbjF5MjV6Z21mMiIsImlhdCI6MTY3ODg1MjQyMH0.5fR1uOof1P0mMUDBDreUPlNwPyPw1oU2PyDM0cka4Uw
+
+
+###
+POST http://localhost:8080/review/api
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuemZ6dTc2YTFlNXk1Z20xMm8zaCIsImlhdCI6MTY3OTYzMDAzMH0.A9UgqJ-a25UxC43jCx4mdA2vN0j4zaj1OF23WHqAESU
+
+{
+    "orderId": 5,
+    "content": "test api",
+    "stars": 5
+}
+
+
+###
+POST http://localhost:8080/comment/api
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJiNjZybjRpeDNleDdzamtzMnkweCIsImlhdCI6MTY3OTcyNjA4MX0.j7oFlL5mjri_NFXjtx_I6VLet34eoc7uS7RDnHcgc1k
+
+{
+    "productId": "sv2boa4h87kaneczfsb2",
+    "content": "reply 2",
+    "reply": "nkn2ul4a3vktnlscij5p"
+}
+
+###
+GET http://localhost:8080/comment/api?id=sv2boa4h87kaneczfsb2
+Content-Type: application/json
+
+
+
+
+
+

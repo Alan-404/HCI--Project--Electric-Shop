@@ -1,5 +1,6 @@
 package com.hci.electric.services.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,9 +19,9 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Order saveRecord(Order record){
+    public Order saveRecord(Order record, boolean reviewed){
         try{
-            record.setReviewed(false);
+            record.setReviewed(reviewed);
 
             return this.orderRepository.save(record);
         }
@@ -38,6 +39,53 @@ public class OrderServiceImpl implements OrderService {
                 return null;
             }
             return items.get();
+        }
+        catch(Exception exception){
+            exception.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public List<Order> getByBillAndReviewedStatus(String billId, boolean reviewed){
+        try{
+            Optional<List<Order>> orders = this.orderRepository.getByBillAndReviewedStatus(billId, reviewed);
+            if (orders.isPresent() == false){
+                return new ArrayList<>();
+            }
+
+            return orders.get();
+        }
+        catch(Exception exception){
+            exception.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public Order getById(Integer id){
+        try{
+            Optional<Order> order = this.orderRepository.getById(id);
+            if (order.isPresent() == false){
+                return null;
+            }
+            return order.get();
+        }
+        catch(Exception exception){
+            exception.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public List<Order> getByProductId(String productId){
+        try{
+            Optional<List<Order>> orders = this.orderRepository.getByProductId(productId);
+            if (orders.isPresent() == false){
+                return new ArrayList<>();
+            }
+
+            return orders.get();
         }
         catch(Exception exception){
             exception.printStackTrace();

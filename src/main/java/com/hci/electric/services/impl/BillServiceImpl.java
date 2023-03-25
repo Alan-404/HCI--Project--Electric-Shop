@@ -1,6 +1,7 @@
 package com.hci.electric.services.impl;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -56,6 +57,21 @@ public class BillServiceImpl implements BillService {
             Optional<List<Bill>> bills = this.billRepository.getByUserId(userId);
             if (bills.isPresent() == false){
                 return null;
+            }
+            return bills.get();
+        }
+        catch(Exception exception){
+            exception.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public List<Bill> getByUserIdAndStatus(String userId, String status){
+        try{
+            Optional<List<Bill>> bills = this.billRepository.getByUserAndStatus(userId, status);
+            if (bills.isPresent() == false){
+                return new ArrayList<>();
             }
             return bills.get();
         }
