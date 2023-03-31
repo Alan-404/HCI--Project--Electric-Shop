@@ -3,6 +3,7 @@ package com.hci.electric.controllers;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -71,6 +72,21 @@ public class AccountController {
         if(this.accountService.edit(account) == null){
             return ResponseEntity.status(500).body(false);
         }
+        return ResponseEntity.status(200).body(true);
+    }
+
+    @DeleteMapping("/api")
+    public ResponseEntity<Boolean> deleteAccount(HttpServletRequest httpServletRequest){
+        String token = httpServletRequest.getHeader("Authorization");
+        Account account = this.auth.checkToken(token);
+        if (account == null){
+            return ResponseEntity.status(400).body(false);
+        }
+        account.setStatus(false);
+        if (this.accountService.edit(account) == null){
+            return ResponseEntity.status(500).body(false);
+        }
+
         return ResponseEntity.status(200).body(true);
     }
 }

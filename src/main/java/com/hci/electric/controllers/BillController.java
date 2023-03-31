@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hci.electric.dtos.bill.BillInfo;
@@ -77,5 +78,27 @@ public class BillController {
 
 
         return ResponseEntity.status(200).body(billDetail);
+    }
+
+    @GetMapping("/api")
+    public ResponseEntity<List<Bill>> getBills(@RequestParam("num") Integer num, @RequestParam("page") Integer page, HttpServletRequest httpServletRequest){
+        String token = httpServletRequest.getHeader("Authorization");
+        Account account = this.auth.checkToken(token);
+        if (account == null){
+            return ResponseEntity.status(400).body(null);
+        }
+
+        if(page == null){
+            page = 1;
+        }
+
+        int totalBills = this.billService.getByUserId(account.getUserId()).size();
+
+        if (num == null){
+            num = totalBills;
+        }
+
+        List<Bill> bills = this.billService.paginateBillsByUserId(account.getUserId(), page, num);
+        return ResponseEntity.status(200).body(bills);
     }
 }

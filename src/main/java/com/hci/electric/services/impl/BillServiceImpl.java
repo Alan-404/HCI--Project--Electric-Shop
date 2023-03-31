@@ -80,4 +80,20 @@ public class BillServiceImpl implements BillService {
             return null;
         }
     }
+
+    @Override
+    public List<Bill> paginateBillsByUserId(String userId, int page, int num){
+        try{
+            Optional<List<Bill>> bills = this.billRepository.paginateBillsByUser(userId, num, (page-1)*num);
+            if (bills.isPresent() == false){
+                return new ArrayList<>();
+            }
+
+            return bills.get();
+        }
+        catch(Exception exception){
+            exception.printStackTrace();
+            return null;
+        }
+    }
 }
