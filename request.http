@@ -252,7 +252,9 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJiNjZybjRpeDNleDdzamtzMnkwe
 GET http://localhost:8080/comment/api?id=sv2boa4h87kaneczfsb2
 Content-Type: application/json
 
-
+###
+GET http://localhost:8080/account/mail
+Content-Type: application/json
 
 
 

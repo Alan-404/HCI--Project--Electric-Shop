@@ -4,6 +4,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,6 +19,7 @@ import com.hci.electric.middlewares.Jwt;
 import com.hci.electric.models.Account;
 import com.hci.electric.models.User;
 import com.hci.electric.services.AccountService;
+import com.hci.electric.services.MailService;
 import com.hci.electric.services.UserService;
 
 @RestController
@@ -27,12 +29,13 @@ public class AccountController {
     private final AccountService accountService;
     private final Jwt jwt;
     private final Auth auth;
+    private final MailService mailService;
 
-    public AccountController(AccountService accountService, UserService userService){
+    public AccountController(AccountService accountService, UserService userService, MailService mailService){
         this.accountService = accountService;
         this.userService = userService;
         this.jwt = new Jwt();
-
+        this.mailService = mailService;
         this.auth = new Auth(this.accountService);
     }
 
@@ -88,5 +91,11 @@ public class AccountController {
         }
 
         return ResponseEntity.status(200).body(true);
+    }
+
+    @GetMapping("/mail")
+    public Boolean sendMail(){
+        this.mailService.sendMail("nguyentri.alan@gmail.com");
+        return true;
     }
 }
