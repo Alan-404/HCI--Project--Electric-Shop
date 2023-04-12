@@ -29,6 +29,7 @@ public class User {
     private Date birthDate;
     private String gender;
     private String address;
+    private String avatar;
     private Timestamp createdAt;
     private Timestamp modifiedAt;
 }

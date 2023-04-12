@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.hci.electric.dtos.user.EditUserRequest;
 import com.hci.electric.dtos.user.RegisterRequest;
 import com.hci.electric.dtos.user.RegisterResponse;
+import com.hci.electric.dtos.user.UserInfo;
 import com.hci.electric.middlewares.Auth;
 import com.hci.electric.models.Account;
 import com.hci.electric.models.User;
@@ -91,18 +92,22 @@ public class UserController {
     }
 
     @GetMapping("/info")
-    public ResponseEntity<User> getByToken(HttpServletRequest httpServletRequest){
+    public ResponseEntity<UserInfo> getByToken(HttpServletRequest httpServletRequest){
         String accessToken = httpServletRequest.getHeader("Authorization");
         
         Account account = this.auth.checkToken(accessToken);
         if(account == null){
             return ResponseEntity.status(400).body(null);
         }
+        UserInfo infor = new UserInfo();
         User user = this.userService.getById(account.getUserId());
+        
         if(user == null){
             return ResponseEntity.status(500).body(null);
         }
-        return ResponseEntity.status(200).body(user);
+        infor.setUser(user);
+        infor.setRole(account.getRole());
+        return ResponseEntity.status(200).body(infor);
 
     }
 }
