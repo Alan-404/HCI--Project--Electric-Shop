@@ -1,6 +1,7 @@
 package com.hci.electric.services.impl;
 
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -82,6 +83,18 @@ public class UserServiceImpl implements UserService {
                 return null;
             }
             return user.get();
+        }
+        catch(Exception exception){
+            exception.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public List<User> getUsers(){
+        try{
+            List<User> users = this.userRepository.findAll();
+            return users;
         }
         catch(Exception exception){
             exception.printStackTrace();

@@ -13,11 +13,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hci.electric.dtos.product.AddProductRequest;
 import com.hci.electric.dtos.product.AddProductResponse;
+import com.hci.electric.dtos.product.PaginateProduct;
 import com.hci.electric.dtos.product.ProductInfor;
+import com.hci.electric.dtos.product.ProductItem;
 import com.hci.electric.middlewares.Auth;
 import com.hci.electric.models.Account;
 import com.hci.electric.models.Discount;
@@ -177,5 +180,38 @@ public class ProductController {
 
         return ResponseEntity.status(200).body(new AddProductResponse(true, "Edit Product Successfully", savedProduct));
     }
+
     
+    @GetMapping("/show")
+    public ResponseEntity<PaginateProduct> getProducts(@RequestParam(required = false) Integer num, @RequestParam(required = false) Integer page){
+        if (page == null){
+            page = 1;
+        }
+
+        int totalProducts = this.productService.getAll().size();
+
+        if (num == null){
+            num = totalProducts;
+        }
+
+        int totalPages = totalProducts/num;
+        if (totalPages%num != 0){
+            totalPages += 1;
+        }
+
+        List<ProductItem> items = new ArrayList<>();
+        List<Product> products = this.productService.paginate(num, page);
+
+        for (Product product : products) {
+            ProductItem item = this.modelMapper.map(product, ProductItem.class);
+            Distributor distributor = this.distributorService.getById(product.getDistributorId());
+            item.setDistributor(distributor);
+            items.add(item);
+        }
+
+        PaginateProduct output = new PaginateProduct(items, totalPages);
+
+        return ResponseEntity.status(200).body(output);
+
+    }
 }

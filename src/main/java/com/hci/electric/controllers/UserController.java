@@ -1,5 +1,8 @@
 package com.hci.electric.controllers;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.modelmapper.ModelMapper;
@@ -15,6 +18,7 @@ import com.hci.electric.dtos.user.EditUserRequest;
 import com.hci.electric.dtos.user.RegisterRequest;
 import com.hci.electric.dtos.user.RegisterResponse;
 import com.hci.electric.dtos.user.UserInfo;
+import com.hci.electric.dtos.user.UserRole;
 import com.hci.electric.middlewares.Auth;
 import com.hci.electric.models.Account;
 import com.hci.electric.models.User;
@@ -109,5 +113,24 @@ public class UserController {
         infor.setRole(account.getRole());
         return ResponseEntity.status(200).body(infor);
 
+    }
+
+    @GetMapping("/admin")
+    public ResponseEntity<List<UserRole>> getUsers(){
+        List<User> users = this.userService.getUsers();
+        if (users == null){
+            return ResponseEntity.status(500).body(new ArrayList<>());
+        }
+        List<UserRole> usersInfor = new ArrayList<>();
+        for (User user : users) {
+            UserRole item = this.modelMapper.map(user, UserRole.class);
+            Account account = this.accountService.getByUserId(user.getId());
+            item.setRole(account.getRole());
+            item.setStatus(account.getStatus());
+
+            usersInfor.add(item);
+        }
+
+        return ResponseEntity.status(200).body(usersInfor);
     }
 }

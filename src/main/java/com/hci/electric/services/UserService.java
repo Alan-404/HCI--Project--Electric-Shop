@@ -1,5 +1,7 @@
 package com.hci.electric.services;
 
+import java.util.List;
+
 import com.hci.electric.models.User;
 
 public interface UserService {
@@ -8,4 +10,5 @@ public interface UserService {
     public User getByEmail(String email);
     public User getById(String id);
     public User getByPhone(String phone);
+    public List<User> getUsers();
 }
