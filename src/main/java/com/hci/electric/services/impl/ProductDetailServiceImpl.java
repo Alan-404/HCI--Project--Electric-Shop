@@ -1,6 +1,7 @@
 package com.hci.electric.services.impl;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,6 +36,18 @@ public class ProductDetailServiceImpl implements ProductDetailService {
     }
 
     @Override
+    public ProductDetail edit(ProductDetail product){
+        try{
+            product.setModifiedAt(new Timestamp(System.currentTimeMillis()));
+            return this.productDetailRepository.save(product);
+        }
+        catch(Exception exception){
+            exception.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
     public List<ProductDetail> getByProductId(String id){
         try{
             Optional<List<ProductDetail>> products = this.productDetailRepository.getByProductId(id);
@@ -59,6 +72,33 @@ public class ProductDetailServiceImpl implements ProductDetailService {
             }
 
             return product.get();
+        }
+        catch(Exception exception){
+            exception.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public List<ProductDetail> getAll(){
+        try{
+            return this.productDetailRepository.findAll();
+        }
+        catch(Exception exception){
+            exception.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public List<ProductDetail> paginate(int page, int num){
+        try{
+            Optional<List<ProductDetail>> products = this.productDetailRepository.paginateProductDetail(num, (page-1)*num);
+            if(products.isPresent() == false){
+                return new ArrayList<>();
+            }
+
+            return products.get();
         }
         catch(Exception exception){
             exception.printStackTrace();

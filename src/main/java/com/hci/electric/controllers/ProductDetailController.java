@@ -1,16 +1,24 @@
 package com.hci.electric.controllers;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hci.electric.dtos.productDetail.AddProductItemRequest;
 import com.hci.electric.dtos.productDetail.AddProductRequest;
+import com.hci.electric.dtos.productDetail.DetailItem;
+import com.hci.electric.dtos.productDetail.PaginateProductDetail;
 import com.hci.electric.middlewares.Auth;
 import com.hci.electric.models.Account;
 import com.hci.electric.models.Discount;
@@ -121,5 +129,76 @@ public class ProductDetailController {
         }
 
         return ResponseEntity.status(200).body(savedItem);
+    }
+
+
+    @GetMapping("/show")
+    public ResponseEntity<PaginateProductDetail> getProductDetails(@RequestParam(required = false) Integer page, @RequestParam(required = false) Integer num){
+        if (page == null){
+            page = 1;
+        }
+
+        int totalProducts = this.productDetailService.getAll().size();
+        if(num == null){
+            num = totalProducts;
+        }
+
+        int totalPage = totalProducts/num;
+        if (totalProducts%num !=0){
+            totalPage++;
+        }
+
+        List<ProductDetail> items = this.productDetailService.paginate(page, num);
+
+        if (items == null){
+            return ResponseEntity.status(500).body(new PaginateProductDetail(new ArrayList<>(), 0));
+        }
+        
+        List<DetailItem> products = new ArrayList<>();
+        for (ProductDetail product : items) {
+            DetailItem item = this.modelMapper.map(product, DetailItem.class);
+            Product orgin = this.productService.getById(product.getProductId());
+            Discount discount = this.discountService.getByProductId(product.getId());
+            Warehouse warehouse = this.warehouseService.getByProductId(product.getId());
+            List<ProductImage> media = this.productImageService.getMediaByProduct(product.getId());
+            List<String> links = new ArrayList<>();
+            for (ProductImage media_item : media) {
+                links.add(media_item.getLink());
+            }
+
+            item.setName(orgin.getName() + " " + product.getSpecifications());
+            item.setDiscount(discount.getValue());
+            item.setWarehouse(warehouse.getQuantity());
+            item.setMedia(links);
+            products.add(item);
+        }
+
+        PaginateProductDetail response = new PaginateProductDetail(products, totalPage);
+
+        return ResponseEntity.status(200).body(response);
+    }
+
+    @PutMapping("/edit")
+    public ResponseEntity<ProductDetail> editProductDetail(@RequestBody DetailItem item){
+        ProductDetail product = this.modelMapper.map(item, ProductDetail.class);
+
+        ProductDetail savedItem = this.productDetailService.edit(product);
+        if (savedItem == null){
+            return ResponseEntity.status(500).body(null);
+        }
+
+        Discount discount = this.discountService.getByProductId(product.getId());
+        discount.setValue(item.getDiscount());
+        this.discountService.save(discount);
+
+        Warehouse warehouse = this.warehouseService.getByProductId(product.getId());
+        warehouse.setQuantity(item.getWarehouse());
+        this.warehouseService.save(warehouse);
+
+        this.productImageService.deleteAllByProduct(product.getId());
+        this.productImageService.saveMedia(item.getMedia());
+
+        return ResponseEntity.status(200).body(savedItem);
+
     }
 }

@@ -44,7 +44,7 @@ public class DistributorController {
         }
 
 
-        distributor.setUserId(account.getUserId());
+        //distributor.setUserId(account.getUserId());
 
         Distributor savedDistributor = this.distributorService.save(distributor);
         if (savedDistributor == null){

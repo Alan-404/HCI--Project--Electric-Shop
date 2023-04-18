@@ -23,5 +23,6 @@ public class Banner {
     private Integer id;
     private String image;
     private String link;
+    private String field;
     private boolean status;
 }

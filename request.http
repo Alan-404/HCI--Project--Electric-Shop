@@ -265,3 +265,7 @@ Content-Type: application/json
 GET http://localhost:8080/product/show
 Content-Type: application/json
 
+###
+GET http://localhost:8080/detail/show?page=1&num=3
+Content-Type: application/json
+
