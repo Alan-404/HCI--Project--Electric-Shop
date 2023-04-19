@@ -10,4 +10,6 @@ public interface BillService {
     public List<Bill> getByUserId(String userId);
     public List<Bill> getByUserIdAndStatus(String userId, String status);
     public List<Bill> paginateBillsByUserId(String userId, int page, int num);
+    public List<Bill> getAll();
+    public List<Bill> paginateBills(int page, int num);
 }

@@ -103,16 +103,19 @@ public class ProductDetailController {
     }
 
     @PostMapping("/save")
-    public ResponseEntity<ProductDetail> saveDetailItem(@RequestBody AddProductItemRequest request){
+    public ResponseEntity<List<ProductDetail>> saveDetailItem(@RequestBody AddProductItemRequest request){
         Product checkProduct = this.productService.getById(request.getProductId());
         if (checkProduct == null){
             return ResponseEntity.status(400).body(null);
         }
         ProductDetail productDetail = this.modelMapper.map(request, ProductDetail.class);
-        ProductDetail savedItem = this.productDetailService.save(productDetail);
-        if (savedItem == null){
-            return ResponseEntity.status(500).body(null);
+        List<ProductDetail> items = new ArrayList<>();
+        for (Integer color : request.getColors()) {
+            productDetail.setColor(color);
+            ProductDetail savedItem =  this.productDetailService.save(productDetail);
+            items.add(savedItem);
         }
+        
 
         Discount discount = new Discount();
         discount.setValue(request.getDiscount());
@@ -124,11 +127,12 @@ public class ProductDetailController {
 
         for (String imageLink : request.getImages()) {
             ProductImage image = new ProductImage();
+            image.setProductId(productDetail.getId());
             image.setLink(imageLink);
             this.productImageService.save(image);
         }
 
-        return ResponseEntity.status(200).body(savedItem);
+        return ResponseEntity.status(200).body(items);
     }
 
 

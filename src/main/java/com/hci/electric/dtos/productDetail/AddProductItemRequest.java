@@ -14,7 +14,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class AddProductItemRequest {
     private String productId;
-    private int color;
+    private List<Integer> colors;
     private String specifications;
     private Double price;
     private boolean status;

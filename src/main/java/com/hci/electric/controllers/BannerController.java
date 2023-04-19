@@ -1,8 +1,12 @@
 package com.hci.electric.controllers;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -45,5 +49,16 @@ public class BannerController {
         }
 
         return ResponseEntity.status(200).body(savedBanner);
+    }
+
+    @GetMapping("show")
+    public ResponseEntity<List<Banner>> getAll(){
+        List<Banner> banners = this.bannerService.getAll();
+
+        if (banners == null){
+            return ResponseEntity.status(500).body(new ArrayList<>());
+        }
+
+        return ResponseEntity.status(200).body(banners);
     }
 }

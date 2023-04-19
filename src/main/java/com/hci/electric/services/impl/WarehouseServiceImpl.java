@@ -1,5 +1,7 @@
 package com.hci.electric.services.impl;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -47,6 +49,33 @@ public class WarehouseServiceImpl implements WarehouseService {
     public Warehouse edit(Warehouse warehouse){
         try{
             return this.warehouseRepository.save(warehouse);
+        }
+        catch(Exception exception){
+            exception.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public List<Warehouse> getAll(){
+        try{
+            return this.warehouseRepository.findAll();
+        }  
+        catch(Exception exception){
+            exception.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public List<Warehouse> paginateWarehouse(int page, int num){
+        try{
+            Optional<List<Warehouse>> warehouses = this.warehouseRepository.paginateWarehouse(num, (page-1)*num);
+            if (warehouses.isPresent() == false){
+                return new ArrayList<>();
+            }
+
+            return warehouses.get();
         }
         catch(Exception exception){
             exception.printStackTrace();

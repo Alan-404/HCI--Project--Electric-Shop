@@ -269,3 +269,30 @@ Content-Type: application/json
 GET http://localhost:8080/detail/show?page=1&num=3
 Content-Type: application/json
 
+
+###
+GET http://localhost:8080/warehouse/show?page=1&num=3
+Content-Type: application/json
+
+###
+GET http://localhost:8080/warehouse/history/6hmez9zidottukc2tdwo?descending=0
+Content-Type: application/json
+
+###
+GET http://localhost:8080/bill/show?page=1&num=2
+Content-Type: application/json
+
+###
+POST http://localhost:8080/detail/save
+Content-Type: application/json
+
+{
+    "productId": "a021dqh6txsf9zywlzhe",
+    "colors": [4,5,6],
+    "specifications": "SSD 1TB RAM 64GB",
+    "price": "8000000",
+    "status": true,
+    "discount": "5",
+    "quantity": "10",
+    "images": ["test4", "test27"]
+}
