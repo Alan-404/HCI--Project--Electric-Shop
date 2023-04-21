@@ -72,7 +72,7 @@ public class OrderController {
         this.history.save(record);
     }
 
-    @PostMapping("/add")
+    /* @PostMapping("/add")
     public ResponseEntity<CreateOrderResponse> createOrder(HttpServletRequest httpServletRequest, @RequestBody CreateOrderRequest request){
         String token = httpServletRequest.getHeader("Authorization");
 
@@ -155,5 +155,5 @@ public class OrderController {
         }   
 
         return ResponseEntity.status(200).body(orders);
-    }
+    } */
 }

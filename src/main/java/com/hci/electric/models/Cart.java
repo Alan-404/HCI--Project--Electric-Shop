@@ -22,9 +22,4 @@ public class Cart {
     @Id
     private String id;
     private String userId;
-    private String productId;
-    private int quantity;
-    private boolean status;
-    private Timestamp createdAt;
-    private Timestamp modifiedAt;
 }

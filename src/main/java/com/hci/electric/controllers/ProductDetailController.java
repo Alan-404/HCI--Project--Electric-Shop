@@ -115,23 +115,6 @@ public class ProductDetailController {
             ProductDetail savedItem =  this.productDetailService.save(productDetail);
             items.add(savedItem);
         }
-        
-
-        Discount discount = new Discount();
-        discount.setValue(request.getDiscount());
-        this.discountService.save(discount);
-
-        Warehouse warehouse = new Warehouse();
-        warehouse.setQuantity(request.getQuantity());
-        this.warehouseService.save(warehouse);
-
-        for (String imageLink : request.getImages()) {
-            ProductImage image = new ProductImage();
-            image.setProductId(productDetail.getId());
-            image.setLink(imageLink);
-            this.productImageService.save(image);
-        }
-
         return ResponseEntity.status(200).body(items);
     }
 
@@ -203,6 +186,5 @@ public class ProductDetailController {
         this.productImageService.saveMedia(item.getMedia());
 
         return ResponseEntity.status(200).body(savedItem);
-
     }
 }

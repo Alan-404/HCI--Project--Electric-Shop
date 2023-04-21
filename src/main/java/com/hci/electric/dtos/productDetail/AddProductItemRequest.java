@@ -18,7 +18,4 @@ public class AddProductItemRequest {
     private String specifications;
     private Double price;
     private boolean status;
-    private Double discount;
-    private int quantity;
-    private List<String> images;
 }

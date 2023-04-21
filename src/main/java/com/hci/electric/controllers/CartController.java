@@ -16,9 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.hci.electric.dtos.cart.CartItem;
-import com.hci.electric.dtos.cart.HandleCartResponse;
-import com.hci.electric.dtos.cart.PaginationCartItems;
 import com.hci.electric.middlewares.Auth;
 import com.hci.electric.models.Account;
 import com.hci.electric.models.Cart;
@@ -54,7 +51,8 @@ public class CartController {
         this.auth = new Auth(this.accountService);
     }
 
-    @PostMapping("/add")
+
+    /* @PostMapping("/add")
     public ResponseEntity<HandleCartResponse> addProduct(@RequestBody Cart cart, HttpServletRequest httpServletRequest){
         String accessToken = httpServletRequest.getHeader("Authorization");
 
@@ -193,5 +191,5 @@ public class CartController {
             return ResponseEntity.status(500).body(false);
         }
         return ResponseEntity.status(200).body(true);
-    }
+    } */
 }

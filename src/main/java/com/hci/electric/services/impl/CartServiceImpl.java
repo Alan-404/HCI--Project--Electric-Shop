@@ -25,6 +25,50 @@ public class CartServiceImpl implements CartService {
     public Cart save(Cart cart){
         try{
             cart.setId(Libraries.generateId(Constants.lengthId));
+            return this.cartRepository.save(cart);
+        }
+        catch(Exception exception){
+            exception.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public List<Cart> getByUserId(String userId){
+        try{
+            Optional<List<Cart>> items = this.cartRepository.getByUserId(userId);
+            if (items.isPresent() == false){
+                return null;
+            }
+
+            return items.get();
+        }
+        catch(Exception exception){
+            exception.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public Cart getById(String id){
+        try{
+            Optional<Cart> item = this.cartRepository.findById(id);
+            if (item.isPresent() == false){
+                return null;
+            }
+
+            return item.get();
+        }
+        catch(Exception exception){
+            exception.printStackTrace();
+            return null;
+        }
+    }
+
+    /* @Override
+    public Cart save(Cart cart){
+        try{
+            cart.setId(Libraries.generateId(Constants.lengthId));
             cart.setStatus(false);
             cart.setCreatedAt(new Timestamp(System.currentTimeMillis()));
             cart.setModifiedAt(new Timestamp(System.currentTimeMillis()));
@@ -167,5 +211,5 @@ public class CartServiceImpl implements CartService {
             exception.printStackTrace();
             return false;
         }
-    }
+    } */
 }
