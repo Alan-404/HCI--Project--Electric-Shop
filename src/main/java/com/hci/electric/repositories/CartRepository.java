@@ -11,7 +11,7 @@ import com.hci.electric.utils.queries.CartQuery;
 
 public interface CartRepository extends JpaRepository<Cart, String> {
     @Query(value = CartQuery.queryGetByUserId, nativeQuery = true)
-    Optional<List<Cart>> getByUserId(String userId);
+    Optional<Cart> getByUserId(String userId);
 
     @Query(value = CartQuery.queryGetByUserIdAndProductId, nativeQuery = true)
     Optional<Cart> getByUserAndProduct(String userId, String productId);

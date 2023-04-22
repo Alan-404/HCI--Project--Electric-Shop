@@ -19,9 +19,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.hci.electric.middlewares.Auth;
 import com.hci.electric.models.Account;
 import com.hci.electric.models.Cart;
+import com.hci.electric.models.CartItem;
 import com.hci.electric.models.ProductDetail;
 import com.hci.electric.models.Warehouse;
 import com.hci.electric.services.AccountService;
+import com.hci.electric.services.CartItemService;
 import com.hci.electric.services.CartService;
 import com.hci.electric.services.ProductDetailService;
 import com.hci.electric.services.ProductService;
@@ -37,159 +39,154 @@ public class CartController {
     private final WarehouseService warehouseService;
     private final ProductService productService;
     private final ProductDetailService productDetailService;
-
+    private final CartItemService cartItemService;
     private final Auth auth;
 
-    public CartController(CartService cartService, AccountService accountService, WarehouseService warehouseService, ProductService productService, ProductDetailService productDetailService){
+    public CartController(CartService cartService, AccountService accountService, WarehouseService warehouseService, ProductService productService, ProductDetailService productDetailService, CartItemService cartItemService){
         this.cartService = cartService;
         this.modelMapper = new ModelMapper();
         this.productDetailService = productDetailService;
         this.accountService = accountService;
         this.warehouseService = warehouseService;
         this.productService = productService;
-
+        this.cartItemService = cartItemService;
         this.auth = new Auth(this.accountService);
     }
 
+    public boolean checkWarehouse(String productId, int quantity){
+        Warehouse warehouse = this.warehouseService.getByProductId(productId);
+        if (warehouse == null || warehouse.getQuantity() == 0 || warehouse.getQuantity() < quantity){
+            return false;
+        }
+        return true;
+    }
 
-    /* @PostMapping("/add")
-    public ResponseEntity<HandleCartResponse> addProduct(@RequestBody Cart cart, HttpServletRequest httpServletRequest){
+    @PostMapping("/add")
+    public ResponseEntity<Boolean> addToCart(@RequestBody CartItem item, HttpServletRequest httpServletRequest){
         String accessToken = httpServletRequest.getHeader("Authorization");
-
         Account account = this.auth.checkToken(accessToken);
-        if (account == null){
-            return ResponseEntity.status(404).body(new HandleCartResponse(false, "Invalid Token", null));
+
+        if(account == null){
+            return ResponseEntity.status(400).body(false);
         }
 
-        ProductDetail product = this.productDetailService.getById(cart.getProductId());
-        if (product == null){
-            return ResponseEntity.status(404).body(new HandleCartResponse(false, "Product has been discontinued", null));
+        Cart cart = this.cartService.getByUserId(account.getUserId());
+        if (cart ==null){
+            cart = new Cart();
+            cart.setUserId(account.getUserId());
+            cart = this.cartService.save(cart);
         }
 
-        Warehouse warehouse = this.warehouseService.getByProductId(cart.getProductId());
-        if (warehouse == null || warehouse.getQuantity() < cart.getQuantity()){
-            return ResponseEntity.status(200).body(new HandleCartResponse(false, "Product is Out of Stock", null));
-        }
-        cart.setUserId(account.getUserId());
-        Cart item = this.cartService.getByUserAndProduct(account.getUserId(), product.getId());
-        Cart savedCart;
-        if (item == null){   
-            savedCart = this.cartService.save(cart);
+        CartItem checkItem = this.cartItemService.getByCartIdAndProduct(cart.getId(), item.getProductId());
+        item.setCartId(cart.getId());
+        if (checkItem == null){
+            if (this.checkWarehouse(item.getProductId(), item.getQuantity()) == false){
+                return ResponseEntity.status(400).body(false);
+            }
+        
+            CartItem savedCartItem = this.cartItemService.save(item);
+            if (savedCartItem == null){
+                return ResponseEntity.status(500).body(false);
+            }
+            return ResponseEntity.status(200).body(true);
         }
         else{
-            cart = this.modelMapper.map(item, Cart.class);
-            cart.setQuantity(item.getQuantity() + cart.getQuantity());
-            if (warehouse.getQuantity() < cart.getQuantity()){
-                return ResponseEntity.status(200).body(new HandleCartResponse(false, "Product is Out of Stock", null));
+            if (this.checkWarehouse(item.getProductId(), item.getQuantity() + checkItem.getQuantity()) == false){
+                return ResponseEntity.status(400).body(false);
             }
-            savedCart = this.cartService.edit(cart);
+            item.setId(checkItem.getId());
+            item.setCreatedAt(checkItem.getCreatedAt());
+            item.setQuantity(item.getQuantity() + checkItem.getQuantity());
+            CartItem savedCartItem = this.cartItemService.edit(item);
+            if (savedCartItem == null){
+                return ResponseEntity.status(500).body(false);
+            }
+            return ResponseEntity.status(200).body(true);
         }
-
-        if (savedCart == null){
-            return ResponseEntity.status(500).body(new HandleCartResponse(false, "Internal Error Server", null));
-        }
-
-        return ResponseEntity.status(200).body(new HandleCartResponse(true, "Add Product Successfully", savedCart));
     }
 
-    @PutMapping("/handle")
-    public ResponseEntity<HandleCartResponse> handleProductCart(HttpServletRequest httpServletRequest, @RequestBody Cart cart){
+    @PutMapping("/edit")
+    public ResponseEntity<Boolean> editQuantityCartItem(HttpServletRequest httpServletRequest, @RequestBody CartItem item){
         String accessToken = httpServletRequest.getHeader("Authorization");
         Account account = this.auth.checkToken(accessToken);
-        if (account == null || account.getStatus() == false){
-            return ResponseEntity.status(404).body(new HandleCartResponse(false, "Invalid Token", null));
-        }
-
-        cart.setUserId(account.getUserId());
-
-        Warehouse warehouse = this.warehouseService.getByProductId(cart.getProductId());
-        if (warehouse.getQuantity() < cart.getQuantity()){
-            return ResponseEntity.status(200).body(new HandleCartResponse(false, "Product is Out of Stock", null));
-        }
-
-        Cart savedCart = this.cartService.edit(cart);
-        if (savedCart == null){
-            return ResponseEntity.status(500).body(new HandleCartResponse(false, "Internal Error Server", null));
-        }
-
-        return ResponseEntity.status(200).body(new HandleCartResponse(true, "Added Product to Cart", savedCart));
-    } 
-
-    @PutMapping("/status/{id}")
-    public ResponseEntity<HandleCartResponse> changeStatusItem(HttpServletRequest httpServletRequest, @PathVariable("id") String cartId){
-        String accessToken = httpServletRequest.getHeader("Authorization");
-        Account account = this.auth.checkToken(accessToken);
-        if (account == null || account.getStatus() == false){
-            return ResponseEntity.status(404).body(new HandleCartResponse(false, "Not Found User", null));
-        }
-
-        Cart item = this.cartService.getById(cartId);
-        if (item == null || item.getUserId().equals(account.getUserId()) == false){
-            return ResponseEntity.status(403).body(new HandleCartResponse(false, "Invalid User", null));
-        }
-        item.setStatus(!(item.isStatus()));
-        Cart savedCart = this.cartService.edit(item);
-
-        if (savedCart == null){
-            return ResponseEntity.status(500).body(new HandleCartResponse(false, "Internal Error Server", null));
-        }
-
-        return ResponseEntity.status(200).body(new HandleCartResponse(true, "Changed Status", savedCart));
-    }
-
-    @GetMapping("/api")
-    public ResponseEntity<PaginationCartItems> getCartByToken(HttpServletRequest httpServletRequest, @RequestParam(name = "num", required = false) Integer num, @RequestParam(name = "page", required = false) Integer page){
-        String accessToken = httpServletRequest.getHeader("Authorization");
-        Account account = this.auth.checkToken(accessToken);
-
-        if (account == null || account.getStatus() == false){
-            return ResponseEntity.status(404).body(new PaginationCartItems(new ArrayList<>(), 0, 0));
-        }
-
-        int totalItems = this.cartService.getByUserId(account.getUserId()).size();
-
-        if (page == null){
-            page = 1;
-        }
-        if (num == null){
-            num = totalItems;
-        }
-
-        List<Cart> productsCart = this.cartService.paginateGetByUserId(account.getUserId(), num, (page-1)*num);
-        if (productsCart == null){
-            return ResponseEntity.status(500).body(new PaginationCartItems(new ArrayList<>(), 0, 0));
-        }
-
-        List<CartItem> items = new ArrayList<>();
-        for (Cart product : productsCart) {
-            CartItem item = new CartItem();
-            item.setCart(product);
-            item.setProduct(this.productService.getById(product.getProductId()));
-
-            items.add(item);
-        }
-
-        int totalPages = totalItems/num;
-        if (totalItems%num != 0){
-            totalPages += 1;
-        }
-
-        return ResponseEntity.status(200).body(new PaginationCartItems(items, totalPages, totalItems));
-    }
-
-    @PutMapping("/all")
-    public ResponseEntity<Boolean> updateAllCarts(HttpServletRequest httpServletRequest, @RequestParam("status") boolean status){
-        String token = httpServletRequest.getHeader("Authorization");
-        Account account = this.auth.checkToken(token);
         if (account == null){
             return ResponseEntity.status(400).body(false);
         }
 
-        List<Cart> items = this.cartService.getByUserId(account.getUserId());
-        boolean savedItems = this.cartService.updateStatusCarts(items, status);
-        if (savedItems == false){
+        Cart cart = this.cartService.getByUserId(account.getUserId());
+        if (cart == null){
+            return ResponseEntity.status(400).body(false);
+        }
+
+        CartItem checkItem = this.cartItemService.getByCartIdAndProduct(cart.getId(), item.getProductId());
+        if (checkItem == null){
+            return ResponseEntity.status(400).body(false);
+        }
+
+        if (this.checkWarehouse(item.getProductId(), item.getQuantity()) == false){
+            return ResponseEntity.status(400).body(false);
+        }
+
+        checkItem.setQuantity(item.getQuantity());
+        checkItem = this.cartItemService.edit(checkItem);
+        if (checkItem == null){
             return ResponseEntity.status(500).body(false);
         }
         return ResponseEntity.status(200).body(true);
-    } */
+    }
+
+
+    @PutMapping("/status/{id}")
+    public ResponseEntity<Boolean> changeStatusProductInCart(HttpServletRequest httpServletRequest, @PathVariable("id") String productId){
+        String accessToken = httpServletRequest.getHeader("Authorization");
+        Account account = this.auth.checkToken(accessToken);
+
+        if (account == null){
+            return ResponseEntity.status(400).body(false);
+        }
+
+        Cart cart = this.cartService.getByUserId(account.getUserId());
+        if (cart == null){
+            return ResponseEntity.status(400).body(false);
+        }
+
+        CartItem item = this.cartItemService.getByCartIdAndProduct(cart.getId(), productId);
+        if (item == null){
+            return ResponseEntity.status(400).body(false);
+        }
+
+        item.setStatus(!item.isStatus());
+        CartItem savedItem = this.cartItemService.edit(item);
+        if (savedItem == null){
+            return ResponseEntity.status(400).body(false);
+        }
+
+        return ResponseEntity.status(200).body(true);
+    }
+    
+
+
+    @PutMapping("/status_all")
+    public ResponseEntity<Boolean> changeStatusAllInCart(HttpServletRequest httpServletRequest, @RequestParam(required = false) Boolean status){
+        String accessToken = httpServletRequest.getHeader("Authorization");
+        Account account = this.auth.checkToken(accessToken);
+
+        if (account == null){
+            return ResponseEntity.status(400).body(false);
+        }
+
+        Cart cart = this.cartService.getByUserId(account.getUserId());
+        if (cart == null){
+            return ResponseEntity.status(400).body(false);
+        }
+        if (status == null){
+            status = true;
+        }
+
+        if (this.cartItemService.changeStatusInCart(cart.getId(), status) == false){
+            return ResponseEntity.status(400).body(false);
+        }
+
+        return ResponseEntity.status(200).body(true);
+    }
 }

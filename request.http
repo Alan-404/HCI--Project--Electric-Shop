@@ -70,7 +70,7 @@ POST http://localhost:8080/account/api
 Content-Type: application/json
 
 {
-    "email": "hoa@gmail.com",
+    "email": "nguyentri.alan@gmail.com",
     "password": "123456"
 }
 
@@ -153,11 +153,11 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuMnhqcWRxbmNqbjF5MjV6Z21mM
 ###
 PUT http://localhost:8080/warehouse/api
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuMnhqcWRxbmNqbjF5MjV6Z21mMiIsImlhdCI6MTY3ODc4MzA4OX0.F8psmquIrjR2KgZn71lesXlBnRWxRIKwJFprYMoMiCc
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuemZ6dTc2YTFlNXk1Z20xMm8zaCIsImlhdCI6MTY4MjE2NzQwM30.a-nMCdfhiCStVWgk6et9mb_QpAfE8nlcpYyByPrhljo
 
 {
-    "productId": "ezxyaxwe6zc1otnz9aq0",
-    "quantity": 100,
+    "productId": "bdpj80j7t982dh06u0s3",
+    "quantity": 21,
     "type": "plus"
 }
 
@@ -287,12 +287,38 @@ POST http://localhost:8080/detail/save
 Content-Type: application/json
 
 {
-    "productId": "a021dqh6txsf9zywlzhe",
-    "colors": [4,5,6],
-    "specifications": "SSD 1TB RAM 64GB",
-    "price": "8000000",
-    "status": true,
-    "discount": "5",
-    "quantity": "10",
-    "images": ["test4", "test27"]
+    "productId": "sv2boa4h87kaneczfsb2",
+    "colors": [0],
+    "specifications": "YOLO",
+    "price": "250000",
+    "status": true
 }
+
+###
+POST http://localhost:8080/cart/add
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuemZ6dTc2YTFlNXk1Z20xMm8zaCIsImlhdCI6MTY4MjE2NTY3NX0.YhaxZnypnyhRLVVvrzSAbFSHrB2CDd6xDK0X-5eLMgY
+
+{
+    "productId": "bdpj80j7t982dh06u0s3",
+    "quantity": 2
+}
+
+###
+PUT http://localhost:8080/cart/status/6hmez9zidottukc2tdwo
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuemZ6dTc2YTFlNXk1Z20xMm8zaCIsImlhdCI6MTY4MjE2NTY3NX0.YhaxZnypnyhRLVVvrzSAbFSHrB2CDd6xDK0X-5eLMgY
+
+###
+PUT http://localhost:8080/cart/edit
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuemZ6dTc2YTFlNXk1Z20xMm8zaCIsImlhdCI6MTY4MjE2NTY3NX0.YhaxZnypnyhRLVVvrzSAbFSHrB2CDd6xDK0X-5eLMgY
+
+{
+    "productId": "6hmez9zidottukc2tdwo",
+    "quantity": 5
+}
+###
+PUT http://localhost:8080/cart/status_all?status=0
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuemZ6dTc2YTFlNXk1Z20xMm8zaCIsImlhdCI6MTY4MjE2NTY3NX0.YhaxZnypnyhRLVVvrzSAbFSHrB2CDd6xDK0X-5eLMgY

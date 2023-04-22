@@ -113,6 +113,17 @@ public class ProductDetailController {
         for (Integer color : request.getColors()) {
             productDetail.setColor(color);
             ProductDetail savedItem =  this.productDetailService.save(productDetail);
+            
+            Warehouse warehouse = new Warehouse();
+            warehouse.setProductId(savedItem.getId());
+            warehouse.setQuantity(0);
+            this.warehouseService.save(warehouse);
+
+            Discount discount = new Discount();
+            discount.setProductId(savedItem.getId());
+            discount.setValue(0.0);
+            this.discountService.save(discount);
+            
             items.add(savedItem);
         }
         return ResponseEntity.status(200).body(items);

@@ -10,4 +10,5 @@ public interface WarehouseService {
     public Warehouse edit(Warehouse warehouse);
     public List<Warehouse> getAll();
     public List<Warehouse> paginateWarehouse(int page, int num);
+    
 }
