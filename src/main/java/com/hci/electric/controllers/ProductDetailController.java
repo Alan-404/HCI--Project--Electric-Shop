@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.hci.electric.dtos.productDetail.AddProductItemRequest;
 import com.hci.electric.dtos.productDetail.AddProductRequest;
 import com.hci.electric.dtos.productDetail.DetailItem;
+import com.hci.electric.dtos.productDetail.EditProductDetailRequest;
 import com.hci.electric.dtos.productDetail.PaginateProductDetail;
 import com.hci.electric.middlewares.Auth;
 import com.hci.electric.models.Account;
@@ -27,12 +28,14 @@ import com.hci.electric.models.Product;
 import com.hci.electric.models.ProductDetail;
 import com.hci.electric.models.ProductImage;
 import com.hci.electric.models.Warehouse;
+import com.hci.electric.models.WarehouseHistory;
 import com.hci.electric.services.AccountService;
 import com.hci.electric.services.DiscountService;
 import com.hci.electric.services.DistributorService;
 import com.hci.electric.services.ProductDetailService;
 import com.hci.electric.services.ProductImageService;
 import com.hci.electric.services.ProductService;
+import com.hci.electric.services.WarehouseHistoryService;
 import com.hci.electric.services.WarehouseService;
 
 @RestController
@@ -46,9 +49,10 @@ public class ProductDetailController {
     private final ProductService productService;
     private final ModelMapper modelMapper;
     private final Auth auth;
+    private final WarehouseHistoryService historyService;
     private final ProductImageService productImageService;
 
-    public ProductDetailController(ProductDetailService productDetailService, AccountService accountService, DistributorService distributorService, DiscountService discountService, WarehouseService warehouseService, ProductService productService, ProductImageService productImageService){
+    public ProductDetailController(ProductDetailService productDetailService, AccountService accountService, DistributorService distributorService, DiscountService discountService, WarehouseService warehouseService, ProductService productService, ProductImageService productImageService, WarehouseHistoryService historyService){
         this.productDetailService = productDetailService;
         this.accountService = accountService;
         this.productService = productService;
@@ -57,6 +61,7 @@ public class ProductDetailController {
         this.distributorService = distributorService;
         this.modelMapper = new ModelMapper();
         this.productImageService = productImageService;
+        this.historyService = historyService;
         this.auth = new Auth(this.accountService);
     }
 
@@ -177,25 +182,44 @@ public class ProductDetailController {
     }
 
     @PutMapping("/edit")
-    public ResponseEntity<ProductDetail> editProductDetail(@RequestBody DetailItem item){
-        ProductDetail product = this.modelMapper.map(item, ProductDetail.class);
-
-        ProductDetail savedItem = this.productDetailService.edit(product);
-        if (savedItem == null){
-            return ResponseEntity.status(500).body(null);
+    public ResponseEntity<ProductDetail> editProductDetail(@RequestBody EditProductDetailRequest request){
+        ProductDetail item = this.productDetailService.getById(request.getProductId());
+        if (item == null){
+            return ResponseEntity.status(400).body(null);
         }
 
-        Discount discount = this.discountService.getByProductId(product.getId());
-        discount.setValue(item.getDiscount());
+        for (String image : request.getImages()) {
+            ProductImage imageItem = new ProductImage();
+            imageItem.setLink(image);
+            this.productImageService.save(imageItem);
+        }
+
+        Discount discount = this.discountService.getByProductId(item.getId());
+        if (request.getDiscount() < 0 || request.getDiscount() > 100){
+            return ResponseEntity.status(400).body(null);
+        }
+
+        discount.setValue(request.getDiscount());
         this.discountService.save(discount);
 
-        Warehouse warehouse = this.warehouseService.getByProductId(product.getId());
-        warehouse.setQuantity(item.getWarehouse());
-        this.warehouseService.save(warehouse);
+        Warehouse warehouse = this.warehouseService.getByProductId(item.getId());
+        if (warehouse.getQuantity() != request.getQuantity()){
+            int delta = warehouse.getQuantity() - request.getQuantity();
+            warehouse.setQuantity(request.getQuantity());
+            this.warehouseService.edit(warehouse);
+            WarehouseHistory history = new WarehouseHistory();
+            if(delta<0){
+                history.setQuantity(-delta);
+                history.setType("PLUS");
+            }
+            else{
+                history.setQuantity(delta);
+                history.setType("MINUS");
+            }
 
-        this.productImageService.deleteAllByProduct(product.getId());
-        this.productImageService.saveMedia(item.getMedia());
-
-        return ResponseEntity.status(200).body(savedItem);
+            this.historyService.save(history);
+        }
+        
+        return ResponseEntity.status(200).body(item);
     }
 }

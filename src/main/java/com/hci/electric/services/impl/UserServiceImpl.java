@@ -26,7 +26,6 @@ public class UserServiceImpl implements UserService {
             user.setId(Libraries.generateId(Constants.lengthId));
             user.setCreatedAt(new Timestamp(System.currentTimeMillis()));
             user.setModifiedAt(new Timestamp(System.currentTimeMillis()));
-            System.out.println(user.getBirthDate());
             return this.userRepository.save(user);
         }
         catch(Exception exception){
