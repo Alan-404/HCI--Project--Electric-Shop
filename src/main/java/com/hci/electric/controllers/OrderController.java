@@ -19,6 +19,7 @@ import com.hci.electric.middlewares.Auth;
 import com.hci.electric.models.Account;
 import com.hci.electric.models.Bill;
 import com.hci.electric.models.Cart;
+import com.hci.electric.models.CartItem;
 import com.hci.electric.models.Discount;
 import com.hci.electric.models.Order;
 import com.hci.electric.models.ProductDetail;
@@ -26,6 +27,7 @@ import com.hci.electric.models.Warehouse;
 import com.hci.electric.models.WarehouseHistory;
 import com.hci.electric.services.AccountService;
 import com.hci.electric.services.BillService;
+import com.hci.electric.services.CartItemService;
 import com.hci.electric.services.CartService;
 import com.hci.electric.services.DiscountService;
 import com.hci.electric.services.OrderService;
@@ -46,9 +48,10 @@ public class OrderController {
     private final WarehouseHistoryService history;
     private final DiscountService discountService;
     private final AccountService accountService;
+    private final CartItemService cartItemService;
     private final Auth auth;
 
-    public OrderController(OrderService orderService, CartService cartService, BillService billService, AccountService accountService, DiscountService discountService, WarehouseService warehouseService, ProductDetailService productDetailService, WarehouseHistoryService history){
+    public OrderController(OrderService orderService, CartService cartService, BillService billService, AccountService accountService, DiscountService discountService, WarehouseService warehouseService, ProductDetailService productDetailService, WarehouseHistoryService history, CartItemService cartItemService){
         this.cartService = cartService;
         this.orderService = orderService;
         this.billService = billService;
@@ -57,7 +60,7 @@ public class OrderController {
         this.warehouseService = warehouseService;
         this.discountService = discountService;
         this.history = history;
-
+        this.cartItemService = cartItemService;
         this.auth = new Auth(this.accountService);
     }
 
@@ -72,7 +75,7 @@ public class OrderController {
         this.history.save(record);
     }
 
-    /* @PostMapping("/add")
+    @PostMapping("/add")
     public ResponseEntity<CreateOrderResponse> createOrder(HttpServletRequest httpServletRequest, @RequestBody CreateOrderRequest request){
         String token = httpServletRequest.getHeader("Authorization");
 
@@ -81,7 +84,12 @@ public class OrderController {
             return ResponseEntity.status(404).body(new CreateOrderResponse(false, "Invalid Token", null));
         }
 
-        List<Cart> items = this.cartService.getByUserIdAndStatus(account.getUserId(), true);
+        Cart checkCart = this.cartService.getByUserId(account.getUserId());
+        if (checkCart == null){
+            return ResponseEntity.status(404).body(new CreateOrderResponse(false, "Not Found Cart", null));
+        }
+
+        List<CartItem> items = this.cartItemService.getByCartAndStatus(checkCart.getId(), true);
         if (items == null || items.size() == 0){
             return ResponseEntity.status(404).body(new CreateOrderResponse(false, "Not found any things in your cart", null));
         }
@@ -91,7 +99,7 @@ public class OrderController {
 
         List<Warehouse> warehouses = new ArrayList<>();
 
-        for (Cart cart : items) {
+        for (CartItem cart : items) {
             ProductDetail product = this.productDetailService.getById(cart.getProductId());
             Warehouse warehouse = this.warehouseService.getByProductId(cart.getProductId());
             if (warehouse.getQuantity() < cart.getQuantity()){
@@ -132,28 +140,10 @@ public class OrderController {
             this.warehouseHandle(warehouses.get(i), items.get(i).getQuantity());
         }
 
-        this.cartService.deleteCarts(items);
+        this.cartItemService.deleteAll(items);
 
         return ResponseEntity.status(200).body(new CreateOrderResponse(true, "Create Order Successfully", bill));
     }
 
-
-    @GetMapping("/review")
-    public ResponseEntity<List<Order>> getOrderItemByReviewedStatus(HttpServletRequest httpServletRequest,@RequestParam("reviewed") boolean reviewed,  @RequestParam("status") String status){
-        String token = httpServletRequest.getHeader("Authorization");
-        status = status.toUpperCase();
-        Account account = this.auth.checkToken(token);
-        if (account == null){
-            return ResponseEntity.status(400).body(new ArrayList<>());
-        }
-
-        List<Bill> statusBill = this.billService.getByUserIdAndStatus(account.getUserId(), status);
-        List<Order> orders = new ArrayList<>();
-        for (Bill bill : statusBill) {
-            List<Order> ordersStatus = this.orderService.getByBillAndReviewedStatus(bill.getId(), reviewed);
-            orders.addAll(ordersStatus);
-        }   
-
-        return ResponseEntity.status(200).body(orders);
-    } */
+    
 }

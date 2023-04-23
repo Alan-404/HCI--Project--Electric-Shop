@@ -16,11 +16,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.hci.electric.dtos.cart.PaginateCartItems;
 import com.hci.electric.middlewares.Auth;
 import com.hci.electric.models.Account;
 import com.hci.electric.models.Cart;
 import com.hci.electric.models.CartItem;
-import com.hci.electric.models.ProductDetail;
 import com.hci.electric.models.Warehouse;
 import com.hci.electric.services.AccountService;
 import com.hci.electric.services.CartItemService;
@@ -188,5 +188,42 @@ public class CartController {
         }
 
         return ResponseEntity.status(200).body(true);
+    }
+
+    @GetMapping("/my")
+    public ResponseEntity<PaginateCartItems> getMyCart(HttpServletRequest httpServletRequest, @RequestParam(required = false) Integer page, @RequestParam(required = false) Integer num){
+        String accessToken = httpServletRequest.getHeader("Authorization");
+        Account account = this.auth.checkToken(accessToken);
+        if (account == null){
+            return ResponseEntity.status(400).body(new PaginateCartItems(new ArrayList<>(), 0));
+        }
+
+        if (page == null){
+            page = 1;
+        }
+
+        Cart cart = this.cartService.getByUserId(account.getUserId());
+        if (cart == null){
+            return ResponseEntity.status(400).body(new PaginateCartItems(new ArrayList<>(), 0));
+        }
+
+        int totalItems = this.cartItemService.getAllItemsByCart(cart.getId()).size();
+        if (num == null){
+            num = totalItems;
+        }
+
+
+        int totalPages = totalItems/num;
+        if (totalItems%num != 0){
+            totalPages++;
+        }
+
+        List<CartItem> items = this.cartItemService.paginateByCartId(cart.getId(), page, num);
+
+        if (items == null){
+            return ResponseEntity.status(500).body(new PaginateCartItems(new ArrayList<>(), 0));
+        }
+
+        return ResponseEntity.status(200).body(new PaginateCartItems(items, totalPages));
     }
 }

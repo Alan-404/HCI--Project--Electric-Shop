@@ -319,6 +319,22 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuemZ6dTc2YTFlNXk1Z20xMm8za
     "quantity": 5
 }
 ###
-PUT http://localhost:8080/cart/status_all?status=0
+PUT http://localhost:8080/cart/status_all?status=1
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuemZ6dTc2YTFlNXk1Z20xMm8zaCIsImlhdCI6MTY4MjE2NTY3NX0.YhaxZnypnyhRLVVvrzSAbFSHrB2CDd6xDK0X-5eLMgY
+
+###
+GET http://localhost:8080/cart/my
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuemZ6dTc2YTFlNXk1Z20xMm8zaCIsImlhdCI6MTY4MjE2NTY3NX0.YhaxZnypnyhRLVVvrzSAbFSHrB2CDd6xDK0X-5eLMgY
+
+
+###
+POST http://localhost:8080/order/add
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuemZ6dTc2YTFlNXk1Z20xMm8zaCIsImlhdCI6MTY4MjE2NTY3NX0.YhaxZnypnyhRLVVvrzSAbFSHrB2CDd6xDK0X-5eLMgY
+
+{
+    "paymentType": "CASH",
+    "status": "COMPREHENSIVE"
+}

@@ -97,4 +97,78 @@ public class CartItemServiceImpl implements CartItemService {
             return false;
         }
     }
+
+    @Override
+    public List<CartItem> paginateByCartId(String cartId, int page, int num){
+        try{
+            Optional<List<CartItem>> items = this.cartItemRepository.paginateByCartId(cartId, num, (page-1)*num);
+            if (items.isPresent() == false){
+                return new ArrayList<>();
+            }
+
+            return items.get();
+        }
+        catch(Exception exception){
+            exception.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public List<CartItem> getByCartAndStatus(String cartId, boolean status){
+        try{
+            Optional<List<CartItem>> items = this.cartItemRepository.getByCartAndStatus(cartId, status);
+            if (items.isPresent() == false){
+                return new ArrayList<>();
+            }
+
+            return items.get();
+        }
+        catch(Exception exception){
+            exception.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public boolean delete(CartItem item){
+        try{
+            this.cartItemRepository.delete(item);
+            return true;
+        }
+        catch(Exception exception){
+            exception.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
+    public boolean deleteAllItemsForOrder(String cartId){
+        try{
+            List<CartItem> items = this.getByCartAndStatus(cartId, true);
+            if (items == null || items.size() == 0){
+                return false;
+            }
+
+            this.cartItemRepository.deleteAll(items);
+
+            return true;
+        }
+        catch(Exception exception){
+            exception.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
+    public boolean deleteAll(List<CartItem> items){
+        try{
+            this.cartItemRepository.deleteAll(items);
+            return true;
+        }
+        catch(Exception exception){
+            exception.printStackTrace();
+            return false;
+        }
+    }
 }

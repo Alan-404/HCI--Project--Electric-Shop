@@ -15,4 +15,10 @@ public interface CartItemRepository extends JpaRepository<CartItem, Integer> {
 
     @Query(value = CartItemQuery.queryGetByCartId, nativeQuery = true)
     Optional<List<CartItem>> getByCartId(String cartId);
+
+    @Query(value = CartItemQuery.paginateGetByCartId, nativeQuery = true)
+    Optional<List<CartItem>> paginateByCartId(String cartId, int limit, int offset);
+
+    @Query(value = CartItemQuery.queryGetByCartIdAndStatus, nativeQuery = true)
+    Optional<List<CartItem>> getByCartAndStatus(String cartId, boolean status);
 }
