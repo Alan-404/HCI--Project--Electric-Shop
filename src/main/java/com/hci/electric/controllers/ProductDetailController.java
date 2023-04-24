@@ -91,12 +91,10 @@ public class ProductDetailController {
             item.setProductId(request.getProductId());
             ProductDetail savedItem = this.productDetailService.save(item);
 
-            
             Warehouse warehouse = new Warehouse();
             warehouse.setProductId(savedItem.getId());
             warehouse.setQuantity(request.getQuantities().get(i));
             this.warehouseService.save(warehouse);
-
 
             Discount discount = new Discount();
             discount.setProductId(savedItem.getId());
