@@ -1,0 +1,16 @@
+@host=http://localhost:8080
+
+POST {{host}}/user/api
+Content-Type: application/json
+
+{
+    "firstName": "Nguyễn",
+    "lastName": "Trí",
+    "phone": "0938671192",
+    "email": "nguyentri.alan@gmail.com",
+    "gender": "Male",
+    "address": "Thu Duc, Ho Chi Minh, Vietnam",
+    "birthDate": "2001-04-04",
+    "password": "123456",
+    "role": "admin"
+}

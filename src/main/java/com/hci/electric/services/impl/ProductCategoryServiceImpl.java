@@ -45,4 +45,24 @@ public class ProductCategoryServiceImpl implements ProductCategoryService {
             return false;
         }
     }
+
+
+    @Override
+    public List<ProductCategory> getByProductId(String productId) {
+        try {
+            return this.productCategoryRepository.findByProductId(productId);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public void delete(int productCategoryId) {
+        try {
+            this.productCategoryRepository.deleteById(productCategoryId);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
 }

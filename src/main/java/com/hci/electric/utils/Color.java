@@ -13,4 +13,8 @@ public class Color {
     public static final int BLACK = 9;
     public static final int WHITE = 10;
     public static final int SILVER = 11;
+    public static final String[] COLORS = {
+        "", "Red", "Blue", "Yellow", "Green", "Gold",
+        "Pink", "Orange", "Violet", "Black", "White", "Silver"
+    };
 }

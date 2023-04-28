@@ -2,8 +2,11 @@ package com.hci.electric.controllers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
@@ -15,17 +18,31 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.WebUtils;
 
+import com.hci.electric.dtos.cart.CartItemResponse;
+import com.hci.electric.dtos.cart.CartResponse;
+import com.hci.electric.dtos.cart.CheckAllRequest;
+import com.hci.electric.dtos.cart.CheckItemRequest;
 import com.hci.electric.dtos.cart.PaginateCartItems;
+import com.hci.electric.dtos.cart.RemoveItemRequest;
+import com.hci.electric.dtos.cart.RemoveMultiItemsRequest;
+import com.hci.electric.dtos.cart.UpdateCartItemRequest;
 import com.hci.electric.middlewares.Auth;
 import com.hci.electric.models.Account;
 import com.hci.electric.models.Cart;
 import com.hci.electric.models.CartItem;
+import com.hci.electric.models.Discount;
+import com.hci.electric.models.Product;
+import com.hci.electric.models.ProductDetail;
+import com.hci.electric.models.ProductImage;
 import com.hci.electric.models.Warehouse;
 import com.hci.electric.services.AccountService;
 import com.hci.electric.services.CartItemService;
 import com.hci.electric.services.CartService;
+import com.hci.electric.services.DiscountService;
 import com.hci.electric.services.ProductDetailService;
+import com.hci.electric.services.ProductImageService;
 import com.hci.electric.services.ProductService;
 import com.hci.electric.services.WarehouseService;
 
@@ -40,9 +57,18 @@ public class CartController {
     private final ProductService productService;
     private final ProductDetailService productDetailService;
     private final CartItemService cartItemService;
+    private final DiscountService discountService;
+    private final ProductImageService productImageService;
     private final Auth auth;
 
-    public CartController(CartService cartService, AccountService accountService, WarehouseService warehouseService, ProductService productService, ProductDetailService productDetailService, CartItemService cartItemService){
+    public CartController(CartService cartService,
+        AccountService accountService,
+        WarehouseService warehouseService,
+        ProductService productService,
+        ProductDetailService productDetailService,
+        CartItemService cartItemService,
+        DiscountService discountService,
+        ProductImageService productImageService) {
         this.cartService = cartService;
         this.modelMapper = new ModelMapper();
         this.productDetailService = productDetailService;
@@ -50,6 +76,8 @@ public class CartController {
         this.warehouseService = warehouseService;
         this.productService = productService;
         this.cartItemService = cartItemService;
+        this.discountService = discountService;
+        this.productImageService = productImageService;
         this.auth = new Auth(this.accountService);
     }
 
@@ -225,5 +253,287 @@ public class CartController {
         }
 
         return ResponseEntity.status(200).body(new PaginateCartItems(items, totalPages));
+    }
+
+    @GetMapping("/user")
+    public ResponseEntity<CartResponse> getCurrentUserCart(
+        HttpServletRequest httpServletRequest,
+        HttpServletResponse httpServletResponse) {
+        
+        String userId = null;
+        Cookie cookie = WebUtils.getCookie(httpServletRequest, "userId");
+        
+        if (cookie != null) {
+            userId = cookie.getValue();
+        }
+
+        String username = userId;
+        String accessToken = httpServletRequest.getHeader("Authorization");
+        Account account = this.auth.checkToken(accessToken);
+
+        if (account == null) {
+            if (userId == null) {
+                UUID annonymousUser = UUID.randomUUID();
+                Cookie userCookie = new Cookie("userId", annonymousUser.toString());
+
+                userCookie.setMaxAge(180 * 24 * 60 * 60);
+                userCookie.setHttpOnly(true);
+                userCookie.setPath("/");
+                httpServletResponse.addCookie(userCookie);
+
+                username = annonymousUser.toString();
+            }
+        } else {
+           username = account.getUserId();
+        }
+
+        CartResponse cartResponse = getOrCreateCartForUser(username);
+
+        return ResponseEntity.status(200).body(cartResponse);
+    }
+
+    @PutMapping("/check-item")
+    public ResponseEntity<CartResponse> checkItem(
+        @RequestBody CheckItemRequest request,
+        HttpServletRequest httpServletRequest) {
+        
+        Cart cart = this.cartService.getById(request.getCartId());
+
+        if (cart == null) {
+            return ResponseEntity.status(400).body(null);
+        }
+
+        CartItem item = this.cartItemService.getByCartIdAndProduct(cart.getId(), request.getProductId());
+
+        if (item == null) {
+            return ResponseEntity.status(400).body(null);
+        }
+
+        item.setStatus(request.isChecked());
+        this.cartItemService.edit(item);
+
+        CartResponse cartResponse = this.map(cart);
+
+        return ResponseEntity.status(200).body(cartResponse);
+    }
+
+    @PutMapping("/check-all")
+    public ResponseEntity<CartResponse> checkItem(
+        @RequestBody CheckAllRequest request,
+        HttpServletRequest httpServletRequest) {
+        
+        Cart cart = this.cartService.getById(request.getCartId());
+
+        if (cart == null) {
+            return ResponseEntity.status(400).body(null);
+        }
+
+        List<CartItem> items = this.cartItemService.getAllItemsByCart(cart.getId());
+
+        for (CartItem item : items) {
+            item.setStatus(request.isChecked());
+            this.cartItemService.edit(item);
+        }
+
+        CartResponse cartResponse = this.map(cart);
+
+        return ResponseEntity.status(200).body(cartResponse);
+    }
+
+    @PutMapping("/remove-item")
+    public ResponseEntity<CartResponse> removeItem(
+        @RequestBody RemoveItemRequest request,
+        HttpServletRequest httpServletRequest) {
+
+        Cart cart = this.cartService.getById(request.getCartId());
+
+        if (cart == null) {
+            return ResponseEntity.status(400).body(null);
+        }
+
+        CartItem item = this.cartItemService.getByCartIdAndProduct(cart.getId(), request.getProductId());
+
+        if (item == null) {
+            return ResponseEntity.status(400).body(null);
+        }
+
+        this.cartItemService.delete(item);
+
+        CartResponse cartResponse = this.map(cart);
+
+        return ResponseEntity.status(200).body(cartResponse);
+    }
+
+    @PutMapping("/remove-multi-items")
+    public ResponseEntity<CartResponse> removeMultiItems(
+        @RequestBody RemoveMultiItemsRequest request,
+        HttpServletRequest httpServletRequest) {
+
+        Cart cart = this.cartService.getById(request.getCartId());
+
+        if (cart == null) {
+            return ResponseEntity.status(400).body(null);
+        }
+
+        for (String productId : request.getProductIds()) {
+            CartItem item = this.cartItemService.getByCartIdAndProduct(request.getCartId(), productId);
+            this.cartItemService.delete(item);
+        }
+
+        CartResponse cartResponse = this.map(cart);
+
+        return ResponseEntity.status(200).body(cartResponse);
+    }
+
+    @PutMapping("/update-cart-item")
+    public ResponseEntity<CartResponse> addToCart(
+        @RequestBody UpdateCartItemRequest request,
+        HttpServletRequest httpServletRequest,
+        HttpServletResponse httpServletResponse) {
+
+        String accessToken = httpServletRequest.getHeader("Authorization");
+        String userId = null;
+        Cookie cookie = WebUtils.getCookie(httpServletRequest, "userId");
+        
+        if (cookie != null) {
+            userId = cookie.getValue();
+        }
+
+        String user = this.getOrSetCartCookieAndUserId(accessToken, userId, httpServletResponse);
+        ProductDetail product = this.productDetailService.getById(request.getProductId());
+
+        if (product == null) {
+            return ResponseEntity.status(400).body(null);
+        }
+
+        Cart cart = this.addItemToCart(user, product.getId(), request.getQuantity());   
+        CartResponse cartResponse = this.map(cart);
+
+        return ResponseEntity.status(200).body(cartResponse);
+        
+    }
+
+    private Cart addItemToCart(String userId, String productId, int quantity) {
+        Cart cart = this.cartService.getByUserId(userId);
+
+        if (cart == null) {
+            cart = new Cart();
+            cart.setUserId(userId);
+
+            this.cartService.save(cart);
+
+            CartItem item = new CartItem();
+    
+            item.setCartId(cart.getId());
+            item.setProductId(productId);
+            item.setQuantity(quantity);
+            item.setStatus(false);
+    
+            this.cartItemService.save(item);
+            
+            return cart;
+        }
+
+        List<CartItem> items = this.cartItemService.getAllItemsByCart(cart.getId());
+
+        boolean isNewItem = true;
+        for (CartItem item : items) {
+            if (item.getProductId().equals(productId) ) {
+                item.setQuantity(item.getQuantity() + quantity);
+                this.cartItemService.edit(item);
+                
+                isNewItem = false;
+                break;
+            }
+        }
+
+        if (isNewItem) {
+            CartItem item = new CartItem();
+            item.setCartId(cart.getId());
+            item.setProductId(productId);
+            item.setQuantity(quantity);
+            
+            this.cartItemService.save(item);
+        }
+
+        return cart;
+    }
+
+    private CartResponse getOrCreateCartForUser(String userId) {
+        Cart cart = this.cartService.getByUserId(userId);
+
+        if (cart == null) {
+            return createCartForUser(userId);
+        }
+
+        return this.map(cart);
+    }
+
+
+    private CartResponse createCartForUser(String userId) {
+        Cart cart = new Cart();
+
+        cart.setUserId(userId);
+
+        this.cartService.save(cart);
+
+        return this.modelMapper.map(cart, CartResponse.class);
+    }
+
+    private CartResponse map(Cart cart) {
+        List<CartItem> items = this.cartItemService.getAllItemsByCart(cart.getId());
+        CartResponse cartResponse = this.modelMapper.map(cart, CartResponse.class);
+        List<CartItemResponse> itemResponses = new ArrayList<>();
+
+        for (CartItem item : items) {
+            CartItemResponse itemResponse = this.modelMapper.map(item, CartItemResponse.class);
+            ProductDetail productDetail = this.productDetailService.getById(item.getProductId());
+            Product productOrigin = this.productService.getById(productDetail.getProductId());
+            Discount discount = this.discountService.getByProductId(productDetail.getId());
+            Warehouse warehouse = this.warehouseService.getByProductId(productDetail.getId());
+            List<ProductImage> images = this.productImageService.getMediaByProduct(productDetail.getId());
+            List<String> imageUrls = new ArrayList<>();
+
+            for (ProductImage image : images) {
+                imageUrls.add(image.getLink());
+            }
+
+            itemResponse.setPrice(productDetail.getPrice());
+            itemResponse.setProductName(productOrigin.getName() + " " + productDetail.getSpecifications());
+            itemResponse.setDiscount(discount.getValue());
+            itemResponse.setImages(imageUrls);
+            itemResponse.setWarehouse(warehouse.getQuantity());
+            
+            itemResponses.add(itemResponse);
+        }
+
+        cartResponse.setCartItems(itemResponses);
+
+        return cartResponse;
+    }
+
+    private String getOrSetCartCookieAndUserId(
+        String accessToken,
+        String userIdCookie,
+        HttpServletResponse httpServletResponse) {
+
+        Account account = this.auth.checkToken(accessToken);
+
+        if (account == null) {
+            if (userIdCookie == null || userIdCookie == "") {
+                UUID anonymousUser = UUID.randomUUID();
+                Cookie cookie = new Cookie("userId", anonymousUser.toString());
+
+                cookie.setMaxAge(180 * 24 * 60 * 60);
+                cookie.setHttpOnly(true);
+                httpServletResponse.addCookie(cookie);
+
+                return anonymousUser.toString();
+            } else {
+                return userIdCookie;
+            }
+        } else {
+            return account.getUserId();
+        }
     }
 }

@@ -11,7 +11,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AddProductRequest {
+public class EditProductRequest {
+    private String id;
     private String name;
     private String description;
     private String information;

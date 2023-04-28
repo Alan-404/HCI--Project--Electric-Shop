@@ -1,6 +1,5 @@
 package com.hci.electric.dtos.product;
 
-import com.hci.electric.models.Product;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,5 +14,5 @@ import lombok.Setter;
 public class AddProductResponse {
     private Boolean success = false;
     private String message = "";
-    private Product product = null;
+    private ProductItem product = null;
 }

@@ -62,5 +62,14 @@ public class CartServiceImpl implements CartService {
         }
     }
 
-    
+    @Override
+    public Cart edit(Cart cart) {
+        try {
+            return this.cartRepository.save(cart);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+
+            return null;
+        }
+    }
 }

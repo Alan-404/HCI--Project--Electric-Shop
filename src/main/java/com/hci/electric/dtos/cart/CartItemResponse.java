@@ -1,4 +1,4 @@
-package com.hci.electric.dtos.productDetail;
+package com.hci.electric.dtos.cart;
 
 import java.util.List;
 
@@ -12,14 +12,13 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class EditProductDetailRequest {
-    private String id;
+public class CartItemResponse {
     private String productId;
-    private Double discount;
-    private int quantity;
-    private String specifications;
+    private String productName;
     private List<String> images;
-    private int color;
-    private Double price;
+    private double price;
+    private double discount;
+    private int quantity;
     private boolean status;
+    private int warehouse;
 }
