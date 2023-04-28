@@ -1,5 +1,7 @@
 package com.hci.electric.services.impl;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.hci.electric.models.DeliveryInfo;
@@ -23,6 +25,27 @@ public class DeliveryInfoServiceImpl implements DeliveryInfoService {
         catch(Exception exception){
             exception.printStackTrace();
             return null;
+        }
+    }
+
+    @Override
+    public List<DeliveryInfo> getByUserId(String userId) {
+        try {
+            return this.deliveryInfoRepository.getByUserId(userId);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public Boolean delete(int id) {
+        try {
+            this.deliveryInfoRepository.deleteById(id);
+            return true;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return false;
         }
     }
 

@@ -12,14 +12,17 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class EditProductDetailRequest {
+public class ProductDetailResponse {
     private String id;
-    private String productId;
-    private Double discount;
-    private int quantity;
-    private String specifications;
-    private List<String> images;
-    private int color;
+    private String objectID;
+    private String name;
+    private String brand;
+    private List<String> categories;
     private Double price;
     private boolean status;
+    private Double discount;
+    private String image;
+    private String specifications;
+    private String color;
+    private String model;
 }

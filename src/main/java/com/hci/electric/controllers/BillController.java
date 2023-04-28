@@ -15,20 +15,27 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.hci.electric.dtos.bill.BillDetail;
 import com.hci.electric.dtos.bill.BillInfo;
+import com.hci.electric.dtos.bill.BillResponse;
+import com.hci.electric.dtos.bill.GetMyBillsResponse;
+import com.hci.electric.dtos.bill.OrderItem;
 import com.hci.electric.dtos.bill.PaginateBill;
 import com.hci.electric.dtos.productDetail.ProductItem;
 import com.hci.electric.middlewares.Auth;
 import com.hci.electric.models.Account;
 import com.hci.electric.models.Bill;
 import com.hci.electric.models.Order;
+import com.hci.electric.models.Product;
 import com.hci.electric.models.ProductDetail;
+import com.hci.electric.models.ProductImage;
 import com.hci.electric.models.User;
 import com.hci.electric.services.AccountService;
 import com.hci.electric.services.BillService;
 import com.hci.electric.services.OrderService;
 import com.hci.electric.services.ProductDetailService;
+import com.hci.electric.services.ProductImageService;
 import com.hci.electric.services.ProductService;
 import com.hci.electric.services.UserService;
+import com.hci.electric.utils.Color;
 
 @RestController
 @RequestMapping("/bill")
@@ -41,7 +48,16 @@ public class BillController {
     private final Auth auth;
     private final ModelMapper modelMapper;
     private final UserService userService;
-    public BillController(BillService billService, OrderService orderService, AccountService accountService, ProductService productService, ProductDetailService productDetailService, UserService userService){
+    private final ProductImageService productImageService;
+
+    public BillController(
+        BillService billService,
+        OrderService orderService,
+        AccountService accountService,
+        ProductService productService,
+        ProductDetailService productDetailService,
+        UserService userService,
+        ProductImageService productImageService) {
         this.billService = billService;
         this.orderService = orderService;
         this.accountService = accountService;
@@ -50,6 +66,7 @@ public class BillController {
         this.modelMapper = new ModelMapper();
         this.auth = new Auth(this.accountService);
         this.userService = userService;
+        this.productImageService = productImageService;
     }
 
     @GetMapping("/{id}")
@@ -151,4 +168,84 @@ public class BillController {
 
 
     }
+
+    @GetMapping("/my-bills")
+    public ResponseEntity<GetMyBillsResponse> getMyBills(
+        @RequestParam("status") String status,
+        @RequestParam("num") Integer num,
+        @RequestParam("page") Integer page,
+        HttpServletRequest httpServletRequest) {
+        
+        String token = httpServletRequest.getHeader("Authorization");
+        Account account = this.auth.checkToken(token);
+
+        if (account == null) {
+            return ResponseEntity.status(400).body(null);
+        }
+
+        if (status == null) {
+            status = "All";
+        }
+
+        int totalItems = 0;
+
+        List<Bill> bills = this.billService.getByUserId(account.getUserId());
+
+        if (bills != null) {
+            totalItems = bills.size();
+        }
+
+        if (page == null) {
+            page = 1;
+        }
+
+        if (num == null) {
+            num = totalItems;
+        }
+
+        List<Bill> paginatedBills = new ArrayList<>();
+
+        if (status.equals("All")) {
+            paginatedBills = this.billService.paginateBillsByUserId(account.getUserId(), page, num);
+        } else {
+            paginatedBills = this.billService.paginateBillsByUserIdAndStatus(account.getUserId(), status, page, num);
+        }
+
+        List<BillResponse> billResponse = new ArrayList<>();
+
+        for (Bill bill : paginatedBills) {
+            BillResponse response = this.modelMapper.map(bill, BillResponse.class);
+            List<Order> orders = this.orderService.getByBillId(bill.getId());
+
+            List<OrderItem> orderItems = new ArrayList<>();
+
+            for (Order order : orders) {
+                OrderItem orderItem = this.modelMapper.map(order, OrderItem.class);
+                ProductDetail detail = this.productDetailService.getById(order.getProductId());
+                Product origin = this.productService.getById(detail.getProductId());
+                List<ProductImage> images = this.productImageService.getMediaByProduct(detail.getId());
+
+                orderItem.setProductName(
+                    origin.getName() + " " +
+                    detail.getSpecifications() + " " +
+                    Color.COLORS[detail.getColor()]);
+                
+                orderItem.setImage(images.get(0).getLink());
+                orderItems.add(orderItem);
+            }
+
+            response.setOrderItems(orderItems);
+            response.setOrderDate(bill.getOrderTime());
+            billResponse.add(response);
+        }
+
+        int totalPage = totalItems / num;
+
+        if (totalItems % num != 0) {
+            totalPage++;
+        }
+
+        return ResponseEntity.status(200).body(new GetMyBillsResponse(billResponse, totalPage, num));
+    }
+    
 }

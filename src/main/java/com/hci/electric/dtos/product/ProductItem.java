@@ -4,7 +4,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.hci.electric.models.Category;
 import com.hci.electric.models.Distributor;
 
 import lombok.AllArgsConstructor;
@@ -25,6 +24,6 @@ public class ProductItem {
     private String distributorId;
     private Timestamp createdAt;
     private Timestamp modifiedAt;
-    private List<Category> categories = new ArrayList<>();
+    private List<String> categories = new ArrayList<>();
     private Distributor distributor;
 }

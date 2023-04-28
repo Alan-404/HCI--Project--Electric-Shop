@@ -22,7 +22,11 @@ public class DetailItem {
     private Double price;
     private boolean status;
     private Double discount;
+    private String distributorId;
+    private String description;
+    private String information;
     private int warehouse;
     private List<String> media;
+    private List<SameOriginProduct> sameOriginProducts;
     private Timestamp modifiedAt;
 }

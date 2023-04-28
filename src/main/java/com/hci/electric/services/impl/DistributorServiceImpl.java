@@ -1,6 +1,8 @@
 package com.hci.electric.services.impl;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -66,4 +68,13 @@ public class DistributorServiceImpl implements DistributorService {
         }
     }
 
+    @Override
+    public List<Distributor> getAll() {
+        try {
+            return this.distributorRepository.findAll();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
 }

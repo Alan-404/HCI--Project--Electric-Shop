@@ -1,8 +1,11 @@
 package com.hci.electric.controllers;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,23 +38,26 @@ public class DistributorController {
         String token = httpServletRequest.getHeader("Authorization");
 
         Account account = this.auth.checkToken(token);
-        if (account == null){
+        if (account == null) {
             return ResponseEntity.status(400).body(new RegisterResponse(false, "You must have registered User before registering as Distributor", null));
         }
-
-        if (this.distributorService.getByUserId(account.getUserId()) != null){
-            return ResponseEntity.status(400).body(new RegisterResponse(false, "You have already been a Distributor", null));
-        }
-
 
         //distributor.setUserId(account.getUserId());
 
         Distributor savedDistributor = this.distributorService.save(distributor);
-        if (savedDistributor == null){
+        if (savedDistributor == null) {
             return ResponseEntity.status(500).body(new RegisterResponse(false, "Internal Error Server", null));
         }
 
-        return ResponseEntity.status(200).body(new RegisterResponse(true, "You have already been a Distributor", savedDistributor));
+        return ResponseEntity.status(200).body(new RegisterResponse(true, "Created Distributor", savedDistributor));
 
+    }
+
+    @GetMapping("/api")
+    public List<Distributor> getAll() {
+
+        List<Distributor> distributors = this.distributorService.getAll();
+
+        return distributors;
     }
 }   

@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.hci.electric.dtos.product.AddProductRequest;
 import com.hci.electric.dtos.product.AddProductResponse;
+import com.hci.electric.dtos.product.EditProductRequest;
 import com.hci.electric.dtos.product.PaginateProduct;
 import com.hci.electric.dtos.product.ProductInfor;
 import com.hci.electric.dtos.product.ProductItem;
@@ -27,6 +28,7 @@ import com.hci.electric.models.Discount;
 import com.hci.electric.models.Distributor;
 import com.hci.electric.models.Order;
 import com.hci.electric.models.Product;
+import com.hci.electric.models.ProductCategory;
 import com.hci.electric.models.ProductDetail;
 import com.hci.electric.models.ProductReview;
 import com.hci.electric.models.Warehouse;
@@ -34,6 +36,7 @@ import com.hci.electric.services.AccountService;
 import com.hci.electric.services.DiscountService;
 import com.hci.electric.services.DistributorService;
 import com.hci.electric.services.OrderService;
+import com.hci.electric.services.ProductCategoryService;
 import com.hci.electric.services.ProductDetailService;
 import com.hci.electric.services.ProductReviewService;
 import com.hci.electric.services.ProductService;
@@ -51,9 +54,20 @@ public class ProductController {
     private final ProductDetailService productDetailService;
     private final OrderService orderService;
     private final ProductReviewService productReviewService;
+    private final ProductCategoryService productCategoryService;
     private final Auth auth;
 
-    public ProductController(ProductService productService, AccountService accountService, DiscountService discountService, WarehouseService warehouseService, DistributorService distributorService, ProductDetailService productDetailService, OrderService orderService, ProductReviewService productReviewService){
+    public ProductController(
+        ProductService productService,
+        AccountService accountService,
+        DiscountService discountService,
+        WarehouseService warehouseService,
+        DistributorService distributorService,
+        ProductDetailService productDetailService,
+        OrderService orderService,
+        ProductReviewService productReviewService,
+        ProductCategoryService productCategoryService) {
+            
         this.productService = productService;
         this.accountService = accountService;
         this.orderService = orderService;
@@ -63,6 +77,7 @@ public class ProductController {
         this.warehouseService = warehouseService;
         this.productReviewService = productReviewService;
         this.modelMapper = new ModelMapper();
+        this.productCategoryService = productCategoryService;
 
         this.auth = new Auth(this.accountService);
     }
@@ -76,19 +91,29 @@ public class ProductController {
             return ResponseEntity.status(403).body(new AddProductResponse(false, "Forbidden", null));
         }
 
-        Distributor distributor = this.distributorService.getByUserId(account.getUserId());
+        Distributor distributor = this.distributorService.getById(request.getDistributorId());
+
         if (distributor == null){
-            return ResponseEntity.status(500).body(new AddProductResponse(false, "You are not a Distributor now", null));
+            return ResponseEntity.status(500).body(new AddProductResponse(false, "Distributor not found", null));
         }
 
         Product product = this.modelMapper.map(request, Product.class);
-        product.setDistributorId(distributor.getId());
         Product savedProduct = this.productService.save(product);
+
         if(savedProduct == null){
             return ResponseEntity.status(500).body(new AddProductResponse(false, "Internal Error Server", null));
         }
 
-        return ResponseEntity.status(200).body(new AddProductResponse(true, "Saved Product", savedProduct));
+        for (String categoryId : request.getCategories()) {
+            ProductCategory pc = new ProductCategory(product.getId(), categoryId);
+
+            this.productCategoryService.save(pc);
+        }
+
+        ProductItem productItem = this.modelMapper.map(product, ProductItem.class);
+        productItem.setCategories(request.getCategories());
+
+        return ResponseEntity.status(200).body(new AddProductResponse(true, "Saved Product", productItem));
     }
 
     @GetMapping("/{id}")
@@ -153,7 +178,7 @@ public class ProductController {
     }
 
     @PutMapping("/api")
-    public ResponseEntity<AddProductResponse> editProduct(@RequestBody Product product, HttpServletRequest httpServletRequest){
+    public ResponseEntity<AddProductResponse> editProduct(@RequestBody EditProductRequest request, HttpServletRequest httpServletRequest){
         String token = httpServletRequest.getHeader("Authorization");
         
         Account account = this.auth.checkToken(token);
@@ -161,24 +186,36 @@ public class ProductController {
             return ResponseEntity.status(400).body(new AddProductResponse(false, "Invalid User", null));
         }
 
-        Distributor distributor = this.distributorService.getByUserId(account.getUserId());
+        Distributor distributor = this.distributorService.getById(request.getDistributorId());
         if (distributor == null){
-            return ResponseEntity.status(400).body(new AddProductResponse(false, "You are not Distributor", null));
+            return ResponseEntity.status(400).body(new AddProductResponse(false, "Distributor not found", null));
         }
 
-        Product checkProduct = this.productService.getById(product.getId());
-        if (checkProduct == null || checkProduct.getDistributorId().equals(distributor.getId()) == false){
-            return ResponseEntity.status(400).body(new AddProductResponse(false, "You are not Owner of Product", null));
-        }
-
+        Product product = this.modelMapper.map(request, Product.class);
+        Product checkProduct = this.productService.getById(request.getId());
+       
         product.setCreatedAt(checkProduct.getCreatedAt());
+
+        List<ProductCategory> pcOldList = this.productCategoryService.getByProductId(product.getId());
+
+        for (ProductCategory pc : pcOldList) {
+            this.productCategoryService.delete(pc.getId());
+        }
+
+        for (String categoryId : request.getCategories()) {
+            ProductCategory pc = new ProductCategory(product.getId(), categoryId);
+            this.productCategoryService.save(pc);
+        }
 
         Product savedProduct = this.productService.edit(product);
         if (savedProduct == null){
             return ResponseEntity.status(500).body(new AddProductResponse(false, "Internal Error Server", null));
         }
 
-        return ResponseEntity.status(200).body(new AddProductResponse(true, "Edit Product Successfully", savedProduct));
+        ProductItem productItem = this.modelMapper.map(savedProduct, ProductItem.class);
+        productItem.setCategories(request.getCategories());
+
+        return ResponseEntity.status(200).body(new AddProductResponse(true, "Edit Product Successfully", productItem));
     }
 
     
@@ -190,22 +227,33 @@ public class ProductController {
 
         int totalProducts = this.productService.getAll().size();
 
-        if (num == null){
-            num = totalProducts;
+        int totalPages = 0;
+
+        if (num == null) {
+            num = 0;
         }
 
-        int totalPages = totalProducts/num;
-        if (totalPages%num != 0){
-            totalPages += 1;
-        }
+        if (totalProducts > 0) {
+            num = totalProducts;
+
+            if (totalPages%num != 0){
+                totalPages += 1;
+            }
+        }  
 
         List<ProductItem> items = new ArrayList<>();
         List<Product> products = this.productService.paginate(num, page);
 
         for (Product product : products) {
             ProductItem item = this.modelMapper.map(product, ProductItem.class);
-            Distributor distributor = this.distributorService.getById(product.getDistributorId());
-            item.setDistributor(distributor);
+            List<ProductCategory> pcList = this.productCategoryService.getByProductId(product.getId());
+            List<String> categoryIds = new ArrayList<>();
+
+            for (ProductCategory pc : pcList) {
+                categoryIds.add(pc.getCategoryId());
+            }
+            
+            item.setCategories(categoryIds);
             items.add(item);
         }
 

@@ -39,7 +39,7 @@ public class BannerController {
         String token = httpServletRequest.getHeader("Authorization");
         
         Account account = this.auth.checkToken(token);
-        if (account == null || account.getRole().equals(Enums.RoleAccount.ADMIN.toString()) == false){
+        if (account == null || account.getRole().equals(Enums.RoleAccount.ADMIN.toString().toLowerCase()) == false){
             return ResponseEntity.status(400).body(null);
         }
 

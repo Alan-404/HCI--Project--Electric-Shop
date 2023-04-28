@@ -21,8 +21,8 @@ public class DeliveryInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    private String billId;
     private String acceptorName;
-    private String deliverdAddress;
+    private String deliveryAddress;
     private String acceptorPhone;
+    private String userId;
 }
