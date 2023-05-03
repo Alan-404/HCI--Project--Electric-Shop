@@ -12,4 +12,7 @@ public interface ProductReviewRepository extends JpaRepository<ProductReview, St
 
     @Query(value = ProductReviewQuery.queryGetReviewProduct, nativeQuery = true)
     public Optional<List<ProductReview>> getByProduct(String productId);
+
+    @Query(value = ProductReviewQuery.queryCountRating, nativeQuery = true)
+    public int countRatingByValue(int value, String productId);
 }

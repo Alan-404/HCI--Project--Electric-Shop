@@ -1,5 +1,7 @@
 package com.hci.electric.models;
 
+import java.sql.Timestamp;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -24,4 +26,5 @@ public class ProductFavorite {
     private Integer id;
     private String userId;
     private String productId;
+    private Timestamp createdAt;
 }

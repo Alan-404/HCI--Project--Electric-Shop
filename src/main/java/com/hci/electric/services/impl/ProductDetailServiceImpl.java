@@ -105,4 +105,20 @@ public class ProductDetailServiceImpl implements ProductDetailService {
             return null;
         }
     }
+
+    @Override
+    public List<ProductDetail> getBestSellers() {
+        try {
+            Optional<List<ProductDetail>> productDetails = this.productDetailRepository.getBestSellers();
+
+            if (productDetails == null) {
+                return new ArrayList<>();
+            }
+
+            return productDetails.get();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
 }

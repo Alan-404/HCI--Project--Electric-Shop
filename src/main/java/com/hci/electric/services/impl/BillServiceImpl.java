@@ -37,6 +37,17 @@ public class BillServiceImpl implements BillService {
     }
 
     @Override
+    public Bill edit(Bill bill) {
+        try {
+            return this.billRepository.save(bill);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+
+            return null;
+        }
+    }
+
+    @Override
     public Bill getById(String id){
         try{
             Optional<Bill> bill = this.billRepository.findById(id);
@@ -136,6 +147,16 @@ public class BillServiceImpl implements BillService {
         }   
         catch(Exception exception){
             exception.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public List<Bill> getBillsByPaymentTypeAndStatus(String paymentType, String status) {
+        try {
+            return this.billRepository.findByPaymentTypeAndStatus(paymentType, status);
+        } catch (Exception ex) {
+            ex.printStackTrace();
             return null;
         }
     }

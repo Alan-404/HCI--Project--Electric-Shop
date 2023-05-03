@@ -13,7 +13,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateOrderResponse {
-    private boolean success;
+    private boolean success = false;
     private String message;
     private Bill bill;
 }

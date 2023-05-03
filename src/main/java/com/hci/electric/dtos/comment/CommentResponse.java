@@ -1,30 +1,26 @@
-package com.hci.electric.models;
+package com.hci.electric.dtos.comment;
 
 import java.sql.Timestamp;
-
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import java.util.ArrayList;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "COMMENT")
-public class Comment {
-    @Id
+public class CommentResponse {
     private String id;
-    private String userId;
-    private String replyUserId;
+    private CommentUser user;
     private String productId;
     private String content;
     private String reply;
     private Timestamp createdAt;
-    private Timestamp modifiedAt;   
+    private Timestamp modifiedAt;
+    List<CommentResponse> replies = new ArrayList<>() ;
 }

@@ -77,4 +77,14 @@ public class ProductImageServiceImpl implements ProductImageService {
             return false;
         }
     }
+
+    @Override
+    public int countProductHaveImage() {
+        try {
+            return this.productImageRepository.totalProductHaveImage().size();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return 0;
+        }
+    }
 }

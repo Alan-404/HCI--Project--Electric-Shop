@@ -5,12 +5,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateOrderRequest {
-    private String paymentType;
-    private String status;
-    private int shippingAddress;
+public class PayWithCreditResponse {
+    private String message;
+    private boolean success = false;
+    private String url;
 }

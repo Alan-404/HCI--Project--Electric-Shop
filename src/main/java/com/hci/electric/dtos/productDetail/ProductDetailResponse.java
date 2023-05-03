@@ -25,4 +25,6 @@ public class ProductDetailResponse {
     private String specifications;
     private String color;
     private String model;
+    private float averageRating;
+    private int numReviews;
 }

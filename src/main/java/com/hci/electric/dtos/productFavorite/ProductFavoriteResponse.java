@@ -1,19 +1,22 @@
-package com.hci.electric.dtos.bill;
+package com.hci.electric.dtos.productFavorite;
+
+import java.sql.Timestamp;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderItem {
-    private Integer id;
-    private double productPrice;
-    private int quantity;
+public class ProductFavoriteResponse {
+    private int id;
+    private String productId;
     private String productName;
     private String image;
-    private boolean reviewed;
+    private Timestamp createdAt;
+    private int totalHeart;
 }

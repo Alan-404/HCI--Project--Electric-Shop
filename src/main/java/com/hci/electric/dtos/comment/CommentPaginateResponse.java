@@ -1,0 +1,22 @@
+package com.hci.electric.dtos.comment;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class CommentPaginateResponse {
+    List<CommentResponse> comments = new ArrayList<>();
+    int totalPage;
+    int totalItems;
+    int page;
+    int perPage;
+}

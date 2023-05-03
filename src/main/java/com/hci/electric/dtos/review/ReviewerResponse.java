@@ -9,9 +9,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AddReviewRequest {
-    private Integer orderId;
-    private String content;
-    private Integer stars;
-    private String productId;
+public class ReviewerResponse {
+    private String id;
+    private String firstName;
+    private String lastName;
+    private String avatar;
 }

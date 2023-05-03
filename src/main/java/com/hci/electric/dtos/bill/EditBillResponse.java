@@ -1,4 +1,4 @@
-package com.hci.electric.dtos.order;
+package com.hci.electric.dtos.bill;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,8 +9,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateOrderRequest {
-    private String paymentType;
-    private String status;
-    private int shippingAddress;
+public class EditBillResponse {
+    private BillResponse bill;
+    private String message;
+    private boolean success = false;
 }

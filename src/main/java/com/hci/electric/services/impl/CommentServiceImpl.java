@@ -67,4 +67,14 @@ public class CommentServiceImpl implements CommentService {
             return null;
         }
     }
+
+    @Override
+    public List<Comment> paginateWithProduct(String productId, int page, int num) {
+        try {
+            return this.commentRepository.paginateWithProduct(productId, page, num);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
 }

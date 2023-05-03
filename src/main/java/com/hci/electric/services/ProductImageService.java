@@ -9,4 +9,5 @@ public interface ProductImageService {
     public List<ProductImage> getMediaByProduct(String productId);
     public boolean deleteAllByProduct(String productId);
     public boolean saveMedia(List<String> links);
+    public int countProductHaveImage();
 }

@@ -12,4 +12,7 @@ import com.hci.electric.utils.queries.ProductImageQuery;
 public interface ProductImageRepository extends JpaRepository<ProductImage, Integer> {
     @Query(value = ProductImageQuery.getMediaByProduct, nativeQuery = true)
     Optional<List<ProductImage>> getMediaByProduct(String productId);
+
+    @Query(value = ProductImageQuery.countByProduct, nativeQuery = true)
+    List<Integer> totalProductHaveImage();
 }

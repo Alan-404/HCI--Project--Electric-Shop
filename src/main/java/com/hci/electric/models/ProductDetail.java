@@ -26,5 +26,8 @@ public class ProductDetail {
     private String specifications;
     private Double price;
     private boolean status;
+    private float averageRating;
+    private int numReviews;
+    private int totalSales;
     private Timestamp modifiedAt;
 }

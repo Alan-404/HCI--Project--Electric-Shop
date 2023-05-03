@@ -9,11 +9,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderItem {
-    private Integer id;
-    private double productPrice;
-    private int quantity;
-    private String productName;
-    private String image;
-    private boolean reviewed;
+public class ShippingAddressResponse {
+    private String acceptorName;
+    private String acceptorPhone;
+    private String deliveryAddress;
 }

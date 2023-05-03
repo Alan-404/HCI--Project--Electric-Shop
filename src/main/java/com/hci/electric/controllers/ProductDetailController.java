@@ -29,9 +29,11 @@ import com.hci.electric.dtos.productDetail.ProductDetailResponse;
 import com.hci.electric.dtos.productDetail.SameOriginProduct;
 import com.hci.electric.middlewares.Auth;
 import com.hci.electric.models.Account;
+import com.hci.electric.models.Bill;
 import com.hci.electric.models.Category;
 import com.hci.electric.models.Discount;
 import com.hci.electric.models.Distributor;
+import com.hci.electric.models.Order;
 import com.hci.electric.models.Product;
 import com.hci.electric.models.ProductCategory;
 import com.hci.electric.models.ProductDetail;
@@ -39,9 +41,11 @@ import com.hci.electric.models.ProductImage;
 import com.hci.electric.models.Warehouse;
 import com.hci.electric.models.WarehouseHistory;
 import com.hci.electric.services.AccountService;
+import com.hci.electric.services.BillService;
 import com.hci.electric.services.CategoryService;
 import com.hci.electric.services.DiscountService;
 import com.hci.electric.services.DistributorService;
+import com.hci.electric.services.OrderService;
 import com.hci.electric.services.ProductCategoryService;
 import com.hci.electric.services.ProductDetailService;
 import com.hci.electric.services.ProductImageService;
@@ -65,6 +69,8 @@ public class ProductDetailController {
     private final ProductImageService productImageService;
     private final CategoryService categoryService;
     private final ProductCategoryService productCategoryService;
+    private final BillService billService;
+    private final OrderService orderService;
 
     @Value("${algolia.app_id}")
     private String algoliaAppId;
@@ -82,7 +88,9 @@ public class ProductDetailController {
         ProductImageService productImageService,
         WarehouseHistoryService historyService,
         CategoryService categoryService,
-        ProductCategoryService productCategoryService) {
+        ProductCategoryService productCategoryService,
+        BillService billService,
+        OrderService orderService) {
         
         this.productDetailService = productDetailService;
         this.accountService = accountService;
@@ -96,6 +104,8 @@ public class ProductDetailController {
         this.categoryService = categoryService;
         this.productCategoryService = productCategoryService;
         this.auth = new Auth(this.accountService);
+        this.billService = billService;
+        this.orderService = orderService;
     }
 
     @PostMapping("/add")
@@ -122,6 +132,8 @@ public class ProductDetailController {
         for (int i=0; i<request.getProducts().size(); i++){
             ProductDetail item = request.getProducts().get(i);
             item.setProductId(request.getProductId());
+            item.setAverageRating(0);
+            item.setNumReviews(0);
             ProductDetail savedItem = this.productDetailService.save(item);
 
             
@@ -150,6 +162,7 @@ public class ProductDetailController {
         List<DetailItem> items = new ArrayList<>();
         for (Integer color : request.getColors()) {
             productDetail.setColor(color);
+            productDetail.setTotalSales(0);
             ProductDetail savedItem =  this.productDetailService.save(productDetail);
             
             Warehouse warehouse = new Warehouse();
@@ -198,7 +211,7 @@ public class ProductDetailController {
         List<ProductDetail> items = this.productDetailService.paginate(page, num);
 
         if (items == null){
-            return ResponseEntity.status(500).body(new PaginateProductDetail(new ArrayList<>(), 0));
+            return ResponseEntity.status(500).body(new PaginateProductDetail(new ArrayList<>(), 0, 0));
         }
         
         List<DetailItem> products = new ArrayList<>();
@@ -220,7 +233,7 @@ public class ProductDetailController {
             products.add(item);
         }
 
-        PaginateProductDetail response = new PaginateProductDetail(products, totalPage);
+        PaginateProductDetail response = new PaginateProductDetail(products, totalPage, totalProducts);
 
         return ResponseEntity.status(200).body(response);
     }
@@ -307,6 +320,8 @@ public class ProductDetailController {
         algoliaResponse.setImage(request.getImages().get(0));
         algoliaResponse.setName(productOrigin.getName() + " " +
             item.getSpecifications() + " " + Color.COLORS[request.getColor()]);
+        algoliaResponse.setColor(Color.COLORS[item.getColor()]);
+        algoliaResponse.setModel(productOrigin.getName());
         algoliaResponse.setObjectID(item.getId());
 
         SearchClient client = DefaultSearchClient.create(this.algoliaAppId, this.algoliaApiKey);
@@ -317,7 +332,13 @@ public class ProductDetailController {
     }
 
     @GetMapping("/single/{id}")
-    public ResponseEntity<DetailItem> getSingle(@PathVariable("id") String id) {
+    public ResponseEntity<DetailItem> getSingle(
+        @PathVariable("id") String id,
+        HttpServletRequest httpServletRequest) {
+        
+        String accessToken = httpServletRequest.getHeader("Authorization");
+        Account account = this.auth.checkToken(accessToken);
+
         if (id == null) {
             return ResponseEntity.status(400).body(null);
         }
@@ -363,6 +384,25 @@ public class ProductDetailController {
 
         for (ProductImage image : images) {
             media.add(image.getLink());
+        }
+
+        if (account != null) {
+            List<Bill> bills = this.billService.getByUserId(account.getUserId());
+
+            for (Bill bill : bills) {
+                List<Order> orders = this.orderService.getByBillId(bill.getId());
+
+                for (Order order : orders) {
+                    if (order.getProductId().equals(id) && order.isReviewed() == false) {
+                        response.setCanReview(true);
+                        break;
+                    }
+                }
+
+                if (response.isCanReview()) {
+                    break;
+                }
+            }
         }
 
         response.setDiscount(discount.getValue());
@@ -421,5 +461,44 @@ public class ProductDetailController {
         index.saveObjects(responses);
 
         return ResponseEntity.status(200).body("Saved objects to algolia");
+    }
+
+    @GetMapping("/best-seller")
+    public ResponseEntity<PaginateProductDetail> getBestSeller() {
+        List<ProductDetail> items = this.productDetailService.getBestSellers();
+
+        if (items == null) {
+            return ResponseEntity.status(500).body(new PaginateProductDetail(new ArrayList<>(), 0, 0));
+        }
+        
+        List<DetailItem> products = new ArrayList<>();
+        
+        for (ProductDetail product : items) {
+            DetailItem item = this.modelMapper.map(product, DetailItem.class);
+            Product orgin = this.productService.getById(product.getProductId());
+            Discount discount = this.discountService.getByProductId(product.getId());
+            Warehouse warehouse = this.warehouseService.getByProductId(product.getId());
+            List<ProductImage> media = this.productImageService.getMediaByProduct(product.getId());
+
+            if (media.size() > 0) {
+                List<String> links = new ArrayList<>();
+    
+                for (ProductImage media_item : media) {
+                    links.add(media_item.getLink());
+                }
+    
+                item.setName(orgin.getName() + " " + product.getSpecifications());
+                item.setDiscount(discount.getValue());
+                item.setWarehouse(warehouse.getQuantity());
+                item.setMedia(links);
+                products.add(item);
+            }
+        }
+
+        int totalItems = this.productImageService.countProductHaveImage();
+
+        PaginateProductDetail response = new PaginateProductDetail(products, 0, totalItems);
+
+        return ResponseEntity.status(200).body(response);
     }
 }
