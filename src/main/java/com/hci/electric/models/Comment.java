@@ -21,6 +21,7 @@ public class Comment {
     @Id
     private String id;
     private String userId;
+    private String replyUserId;
     private String productId;
     private String content;
     private String reply;

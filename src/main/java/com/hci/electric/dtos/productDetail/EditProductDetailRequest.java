@@ -22,4 +22,5 @@ public class EditProductDetailRequest {
     private int color;
     private Double price;
     private boolean status;
+    private boolean showOnHomePage;
 }

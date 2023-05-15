@@ -15,4 +15,5 @@ import lombok.Setter;
 public class PaginateProductDetail {
     private List<DetailItem> items;
     private int totalPages;
+    private int totalItems;
 }

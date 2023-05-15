@@ -15,4 +15,5 @@ public class OrderItem {
     private int quantity;
     private String productName;
     private String image;
+    private boolean reviewed;
 }

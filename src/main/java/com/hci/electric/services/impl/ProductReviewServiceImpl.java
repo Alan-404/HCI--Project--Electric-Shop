@@ -51,4 +51,16 @@ public class ProductReviewServiceImpl implements ProductReviewService {
             return null;
         }
     }
+
+    @Override
+    public int countRaingByValueAndProductId(int value, String productId) {
+        try {
+            int num = this.productReviewRepository.countRatingByValue(value, productId);
+
+            return num;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return 0;
+        }
+    }
 }

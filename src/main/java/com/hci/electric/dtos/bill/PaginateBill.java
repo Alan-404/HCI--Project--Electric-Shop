@@ -12,6 +12,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PaginateBill {
-    private List<BillDetail> items;
+    private List<BillResponse> items;
     private int totalPages;
 }

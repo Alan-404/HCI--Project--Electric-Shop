@@ -29,4 +29,8 @@ public class DetailItem {
     private List<String> media;
     private List<SameOriginProduct> sameOriginProducts;
     private Timestamp modifiedAt;
+    private float averageRating;
+    private int numReviews;
+    private boolean canReview = false;
+    private boolean showOnHomePage;
 }

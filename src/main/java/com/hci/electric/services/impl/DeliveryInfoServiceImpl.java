@@ -1,6 +1,7 @@
 package com.hci.electric.services.impl;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -49,4 +50,13 @@ public class DeliveryInfoServiceImpl implements DeliveryInfoService {
         }
     }
 
+    @Override
+    public Optional<DeliveryInfo> getById(int id) {
+        try {
+            return this.deliveryInfoRepository.findById(id);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
 }

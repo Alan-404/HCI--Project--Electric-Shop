@@ -11,4 +11,7 @@ import com.hci.electric.utils.queries.ProductCategoryQuery;
 public interface ProductCategoryRepository extends JpaRepository<ProductCategory, Integer> {
     @Query(value = ProductCategoryQuery.queryByProductId, nativeQuery = true)
     public List<ProductCategory> findByProductId(String productId);
+
+    @Query(value = ProductCategoryQuery.queryByCategoryId, nativeQuery = true)
+    public List<ProductCategory> findByCategoryId(String categoryId);
 }

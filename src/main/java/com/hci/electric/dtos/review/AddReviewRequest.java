@@ -13,4 +13,5 @@ public class AddReviewRequest {
     private Integer orderId;
     private String content;
     private Integer stars;
+    private String productId;
 }

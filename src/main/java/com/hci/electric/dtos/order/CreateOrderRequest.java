@@ -12,4 +12,5 @@ import lombok.Setter;
 public class CreateOrderRequest {
     private String paymentType;
     private String status;
+    private int shippingAddress;
 }

@@ -287,6 +287,8 @@ public class CartController {
            username = account.getUserId();
         }
 
+        System.out.println("Username.....................: " + username);
+
         CartResponse cartResponse = getOrCreateCartForUser(username);
 
         return ResponseEntity.status(200).body(cartResponse);
@@ -488,6 +490,11 @@ public class CartController {
         for (CartItem item : items) {
             CartItemResponse itemResponse = this.modelMapper.map(item, CartItemResponse.class);
             ProductDetail productDetail = this.productDetailService.getById(item.getProductId());
+            
+            if (productDetail == null) {
+                continue;
+            }
+
             Product productOrigin = this.productService.getById(productDetail.getProductId());
             Discount discount = this.discountService.getByProductId(productDetail.getId());
             Warehouse warehouse = this.warehouseService.getByProductId(productDetail.getId());

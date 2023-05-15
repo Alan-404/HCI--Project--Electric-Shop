@@ -21,4 +21,5 @@ public class BillResponse {
     private String paymentType;
     private String status;
     private List<OrderItem> orderItems;
+    private ShippingAddressResponse ShippingAddress;
 }

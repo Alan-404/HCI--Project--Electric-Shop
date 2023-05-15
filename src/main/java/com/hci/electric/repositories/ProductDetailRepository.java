@@ -15,4 +15,7 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, St
 
     @Query(value = ProductDetailQuery.paginateProductDetail, nativeQuery = true)
     public Optional<List<ProductDetail>> paginateProductDetail(int limit, int offset);
+
+    @Query(value = ProductDetailQuery.queryBestSeller, nativeQuery = true)
+    public Optional<List<ProductDetail>> getBestSellers();
 }

@@ -1,0 +1,6 @@
+@host=http://localhost:8080
+
+GET {{host}}/review/product?id=/jz3diptw0u5r796nifwg
+Content-Type: application/json
+
+

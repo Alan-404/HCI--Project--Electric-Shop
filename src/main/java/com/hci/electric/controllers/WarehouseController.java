@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,15 +17,19 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.hci.electric.dtos.warehouse.EditQuantityWarehouseRequest;
 import com.hci.electric.dtos.warehouse.EditWarehouseResponse;
+import com.hci.electric.dtos.warehouse.WarehouseResponse;
 import com.hci.electric.middlewares.Auth;
 import com.hci.electric.models.Account;
+import com.hci.electric.models.Product;
 import com.hci.electric.models.ProductDetail;
 import com.hci.electric.models.Warehouse;
 import com.hci.electric.models.WarehouseHistory;
 import com.hci.electric.services.AccountService;
 import com.hci.electric.services.ProductDetailService;
+import com.hci.electric.services.ProductService;
 import com.hci.electric.services.WarehouseHistoryService;
 import com.hci.electric.services.WarehouseService;
+import com.hci.electric.utils.Color;
 import com.hci.electric.utils.Enums;
 
 @RestController
@@ -34,14 +39,23 @@ public class WarehouseController {
     private final WarehouseHistoryService warehouseHistoryService;
     private final AccountService accountService;
     private final ProductDetailService productDetailService;
+    private final ModelMapper modelMapper;
+    private final ProductService productService;
     private final Auth auth;
 
-    public WarehouseController(WarehouseService warehouseService, WarehouseHistoryService warehouseHistoryService, AccountService accountService, ProductDetailService productDetailService){
+    public WarehouseController(
+        WarehouseService warehouseService,
+        WarehouseHistoryService warehouseHistoryService,
+        AccountService accountService,
+        ProductDetailService productDetailService,
+        ProductService productService) {
         this.warehouseHistoryService = warehouseHistoryService;
         this.warehouseService = warehouseService;
         this.accountService = accountService;
         this.productDetailService = productDetailService;
         this.auth = new Auth(this.accountService);
+        this.modelMapper = new ModelMapper();
+        this.productService = productService;
     }
 
     @PutMapping("/api")
@@ -94,36 +108,48 @@ public class WarehouseController {
     }
 
     @GetMapping("/show")
-    public ResponseEntity<List<Warehouse>> paginageWarehouses(@RequestParam(required = false) Integer num, @RequestParam(required = false) Integer page){
-        if(page == null){
-            page = 0;
+    public ResponseEntity<List<WarehouseResponse>> paginageWarehouses(@RequestParam(required = false) Integer num, @RequestParam(required = false) Integer page){
+        if (page == null) {
+            page = 1;
         }
 
         int totalItems = this.warehouseService.getAll().size();
 
-        if (num == null){
+        if (num == null) {
             num = totalItems;
         }
 
-        /* int totalPages = totalItems/num;
-        if (totalItems%num != 0){
-            totalPages++;
-        } */
 
         List<Warehouse> warehouses = this.warehouseService.paginateWarehouse(page, num);
 
-        if (warehouses == null){
+        if (warehouses == null) {
             return ResponseEntity.status(500).body(new ArrayList<>());
         }
 
-        return ResponseEntity.status(200).body(warehouses);
+        List<WarehouseResponse> responses = new ArrayList<>();
+
+        for (Warehouse warehouse : warehouses) {
+            WarehouseResponse response = modelMapper.map(warehouse, WarehouseResponse.class);
+            ProductDetail productDetail = this.productDetailService.getById(warehouse.getProductId());
+            Product productOrigin = this.productService.getById(productDetail.getProductId());
+
+            response.setProductName(
+              productOrigin.getName() + " " +
+              productDetail.getSpecifications() + " " +
+              Color.COLORS[productDetail.getColor()]
+            );
+
+            responses.add(response);
+        }
+
+        return ResponseEntity.status(200).body(responses);
     }
 
     @GetMapping("/history/{id}")
     public ResponseEntity<List<WarehouseHistory>> paginateHistory(@PathVariable("id") String productId, @RequestParam(required = false) Boolean descending){
         ProductDetail item = this.productDetailService.getById(productId);
 
-        if (item == null){
+        if (item == null) {
             return ResponseEntity.status(400).body(null);
         }
 
@@ -133,7 +159,7 @@ public class WarehouseController {
 
         Warehouse warehouse = this.warehouseService.getByProductId(item.getId());
         List<WarehouseHistory> histories = this.warehouseHistoryService.getByWarehouse(warehouse.getId(), descending);
-        if (histories == null){
+        if (histories == null) {
             return ResponseEntity.status(500).body(new ArrayList<>());
         }
         return ResponseEntity.status(200).body(histories);

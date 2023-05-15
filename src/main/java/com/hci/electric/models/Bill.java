@@ -26,4 +26,5 @@ public class Bill {
     private Double price;
     private String paymentType;
     private String status;
+    private int deliveryInfoId;
 }

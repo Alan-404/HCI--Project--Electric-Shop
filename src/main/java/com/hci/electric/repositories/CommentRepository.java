@@ -15,4 +15,10 @@ public interface CommentRepository extends JpaRepository<Comment, String> {
 
     @Query(value = CommentQuery.queryGetRepliesOfComment, nativeQuery = true)
     Optional<List<Comment>> getRepliesOfComment(String commentId);
+
+    @Query(value = CommentQuery.queryPaginateWithProductNewest, nativeQuery = true)
+    List<Comment> paginateWithProductNewest(String productId, int page, int num);
+
+    @Query(value = CommentQuery.queryPaginateWithProductOldest, nativeQuery = true)
+    List<Comment> paginateWithProductOldest(String productId, int page, int num);
 }
