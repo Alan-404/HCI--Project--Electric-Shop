@@ -121,7 +121,7 @@ public class OrderController {
         Account account = this.auth.checkToken(token);
 
         if (account == null) {
-            response.setMessage("You are not loggged in.");
+            response.setMessage("You are not logged in.");
 
             return ResponseEntity.status(401).body(response);
         }

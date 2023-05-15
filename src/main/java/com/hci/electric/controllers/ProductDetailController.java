@@ -26,6 +26,7 @@ import com.hci.electric.dtos.productDetail.DetailItem;
 import com.hci.electric.dtos.productDetail.EditProductDetailRequest;
 import com.hci.electric.dtos.productDetail.PaginateProductDetail;
 import com.hci.electric.dtos.productDetail.ProductDetailResponse;
+import com.hci.electric.dtos.productDetail.ProductsPerCategoryResponse;
 import com.hci.electric.dtos.productDetail.SameOriginProduct;
 import com.hci.electric.middlewares.Auth;
 import com.hci.electric.models.Account;
@@ -163,6 +164,7 @@ public class ProductDetailController {
         for (Integer color : request.getColors()) {
             productDetail.setColor(color);
             productDetail.setTotalSales(0);
+            productDetail.setShowOnHomePage(false);
             ProductDetail savedItem =  this.productDetailService.save(productDetail);
             
             Warehouse warehouse = new Warehouse();
@@ -256,6 +258,7 @@ public class ProductDetailController {
         item.setSpecifications(request.getSpecifications());
         item.setPrice(request.getPrice());
         item.setProductId(request.getProductId());
+        item.setShowOnHomePage(request.isShowOnHomePage());
 
         this.productDetailService.edit(item);
 
@@ -480,7 +483,7 @@ public class ProductDetailController {
             Warehouse warehouse = this.warehouseService.getByProductId(product.getId());
             List<ProductImage> media = this.productImageService.getMediaByProduct(product.getId());
 
-            if (media.size() > 0) {
+            if (media.size() > 0 && product.isShowOnHomePage()) {
                 List<String> links = new ArrayList<>();
     
                 for (ProductImage media_item : media) {
@@ -500,5 +503,59 @@ public class ProductDetailController {
         PaginateProductDetail response = new PaginateProductDetail(products, 0, totalItems);
 
         return ResponseEntity.status(200).body(response);
+    }
+
+    @GetMapping("/products-per-category")
+    public ResponseEntity<List<ProductsPerCategoryResponse>> productsPerCategory() {
+        List<ProductsPerCategoryResponse> responses = new ArrayList<>();
+        List<Category> categories = this.categoryService.getAll();
+
+        for (Category category : categories) {
+            List<ProductCategory> pcList = this.productCategoryService.getByCategoryId(category.getId());
+            ProductsPerCategoryResponse response = new ProductsPerCategoryResponse();
+            
+            response.setId(category.getName());
+
+            List<DetailItem> items = new ArrayList<>();
+
+            for (ProductCategory pc : pcList) {
+                Product origin = this.productService.getById(pc.getProductId());
+
+                List<ProductDetail> productDetails = this.productDetailService.getByProductId(origin.getId());
+
+                for (ProductDetail pd : productDetails) {     
+                    DetailItem item = this.modelMapper.map(pd, DetailItem.class);
+                    Discount discount = this.discountService.getByProductId(pd.getId());
+                    Warehouse warehouse = this.warehouseService.getByProductId(pd.getId());
+                    List<ProductImage> media = this.productImageService.getMediaByProduct(pd.getId());
+    
+                    if (media.size() > 0 && pd.isShowOnHomePage()) {
+                        List<String> links = new ArrayList<>();
+            
+                        for (ProductImage media_item : media) {
+                            links.add(media_item.getLink());
+                        }
+            
+                        item.setName(
+                            origin.getName() + " " +
+                            pd.getSpecifications() + " " +
+                            Color.COLORS[pd.getColor()]);
+                            
+                        item.setDiscount(discount.getValue());
+                        item.setWarehouse(warehouse.getQuantity());
+                        item.setMedia(links);
+    
+                        items.add(item);
+                    }
+                }
+
+            }
+
+            response.setProducts(items);
+            responses.add(response);
+        }
+
+
+        return ResponseEntity.status(200).body(responses);
     }
 }

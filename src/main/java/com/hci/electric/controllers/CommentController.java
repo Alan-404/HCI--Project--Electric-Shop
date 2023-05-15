@@ -94,10 +94,15 @@ public class CommentController {
     public ResponseEntity<CommentPaginateResponse> getCommentsByProduct(
         @PathVariable("id") String productId,
         @RequestParam(required = false) Integer page,
-        @RequestParam(required = false) Integer num) {
+        @RequestParam(required = false) Integer num,
+        @RequestParam(required = false) Boolean sortByNewest) {
 
         int totalItems = this.commentService.getCommentsByProduct(productId).size();
         int totalPage = 0;
+        
+        if (sortByNewest == null) {
+            sortByNewest = false;
+        }
 
         if (totalItems > 0) {
             if (page == null) {
@@ -115,7 +120,7 @@ public class CommentController {
             }
         }
 
-        List<Comment> comments = this.commentService.paginateWithProduct(productId, page, num);
+        List<Comment> comments = this.commentService.paginateWithProduct(productId, page, num, sortByNewest);
         List<CommentResponse> responses = new ArrayList<>();
 
         for (Comment comment : comments) {

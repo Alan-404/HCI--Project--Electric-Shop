@@ -1,6 +1,7 @@
-package com.hci.electric.dtos.bill;
+package com.hci.electric.dtos.productDetail;
 
 import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,7 +12,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PaginateBill {
-    private List<BillResponse> items;
-    private int totalPages;
+public class ProductsPerCategoryResponse {
+    private String id;
+    private List<DetailItem> products;
 }

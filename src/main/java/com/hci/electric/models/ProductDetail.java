@@ -29,5 +29,6 @@ public class ProductDetail {
     private float averageRating;
     private int numReviews;
     private int totalSales;
+    private boolean showOnHomePage;
     private Timestamp modifiedAt;
 }

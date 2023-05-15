@@ -149,24 +149,30 @@ public class BillController {
     }
 
     @GetMapping("/api")
-    public ResponseEntity<List<Bill>> getBills(@RequestParam("num") Integer num, @RequestParam("page") Integer page, HttpServletRequest httpServletRequest){
+    public ResponseEntity<List<Bill>> getBills(
+        @RequestParam(name = "num", required = false) Integer num,
+        @RequestParam(name = "page", required = false) Integer page,
+        HttpServletRequest httpServletRequest) {
+
         String token = httpServletRequest.getHeader("Authorization");
         Account account = this.auth.checkToken(token);
-        if (account == null){
+
+        if (account == null) {
             return ResponseEntity.status(400).body(null);
         }
 
-        if(page == null){
+        if (page == null) {
             page = 1;
         }
 
         int totalBills = this.billService.getByUserId(account.getUserId()).size();
 
-        if (num == null){
+        if (num == null) {
             num = totalBills;
         }
 
         List<Bill> bills = this.billService.paginateBillsByUserId(account.getUserId(), page, num);
+
         return ResponseEntity.status(200).body(bills);
     }
 
@@ -184,23 +190,55 @@ public class BillController {
         }
 
         List<Bill> bills = this.billService.paginateBills(page, num);
+
         if (bills == null){
             return ResponseEntity.status(500).body(new PaginateBill(new ArrayList<>(), 0));
         }
-        List<BillDetail> items = new ArrayList<>();
-        for (Bill bill : bills) {
-            User user = this.userService.getById(bill.getUserId());
-            BillDetail item = this.modelMapper.map(bill, BillDetail.class);
-            item.setFirstName(user.getFirstName());
-            item.setLastName(user.getLastName());
-            item.setEmail(user.getEmail());
-            item.setAddress(user.getAddress());
-            item.setAvatar(user.getAvatar());
-            item.setPhone(user.getPhone());
-            item.setBirthDate(user.getBirthDate());
-            item.setGender(user.getGender());
 
-            items.add(item);
+        List<BillResponse> items = new ArrayList<>();
+
+        for (Bill bill : bills) {
+            BillResponse response = this.modelMapper.map(bill, BillResponse.class);
+            List<Order> orders = this.orderService.getByBillId(bill.getId());
+            
+            List<OrderItem> orderItems = new ArrayList<>();
+
+            for (Order order : orders) {
+                OrderItem orderItem = this.modelMapper.map(order, OrderItem.class);
+                ProductDetail detail = this.productDetailService.getById(order.getProductId());
+                Product origin = this.productService.getById(detail.getProductId());
+                List<ProductImage> images = this.productImageService.getMediaByProduct(detail.getId());
+
+                orderItem.setProductName(
+                    origin.getName() + " " +
+                    detail.getSpecifications() + " " +
+                    Color.COLORS[detail.getColor()]);
+                
+                orderItem.setImage(images.get(0).getLink());
+                orderItems.add(orderItem);
+            }
+
+            if (bill.getDeliveryInfoId() != 0) {
+                Optional<DeliveryInfo> deliveryInfo = this.deliveryInfoService.getById(bill.getDeliveryInfoId());
+                
+                if (deliveryInfo != null) {
+                    ShippingAddressResponse shippingAddress = this.modelMapper.map(deliveryInfo, ShippingAddressResponse.class);
+                    response.setShippingAddress(shippingAddress);
+                }
+            } else {
+                User currentUser = this.userService.getById(bill.getUserId());
+
+                ShippingAddressResponse shippingAddress = new ShippingAddressResponse();
+                shippingAddress.setAcceptorName(currentUser.getFirstName() + " " + currentUser.getLastName());
+                shippingAddress.setAcceptorPhone(currentUser.getPhone());
+                shippingAddress.setDeliveryAddress(currentUser.getAddress());
+
+                response.setShippingAddress(shippingAddress);
+            }
+
+            response.setOrderItems(orderItems);
+            response.setOrderDate(bill.getOrderTime());
+            items.add(response);
         }
 
         int totalPages = totalItems/num;
@@ -345,7 +383,9 @@ public class BillController {
 
             for (Order order : orders) {
                 Warehouse warehouse = this.warehouseService.getByProductId(order.getProductId());
-                warehouseHandle(warehouse, order.getQuantity(), request.getStatus());
+                if (request.getStatus().equals("Cancelled")) {
+                    warehouseHandle(warehouse, order.getQuantity(), request.getStatus());
+                }
 
                 ProductDetail productDetail = this.productDetailService.getById(order.getProductId());
 

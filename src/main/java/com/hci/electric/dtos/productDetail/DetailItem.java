@@ -32,4 +32,5 @@ public class DetailItem {
     private float averageRating;
     private int numReviews;
     private boolean canReview = false;
+    private boolean showOnHomePage;
 }

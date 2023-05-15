@@ -1,5 +1,6 @@
 package com.hci.electric.services.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -63,6 +64,16 @@ public class ProductCategoryServiceImpl implements ProductCategoryService {
             this.productCategoryRepository.deleteById(productCategoryId);
         } catch (Exception ex) {
             ex.printStackTrace();
+        }
+    }
+
+    @Override
+    public List<ProductCategory> getByCategoryId(String categoryId) {
+        try {
+            return this.productCategoryRepository.findByCategoryId(categoryId);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return new ArrayList<>();
         }
     }
 }
