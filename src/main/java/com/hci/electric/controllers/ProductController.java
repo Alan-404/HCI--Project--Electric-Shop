@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.hci.electric.dtos.common.DeleteResponse;
 import com.hci.electric.dtos.product.AddProductRequest;
 import com.hci.electric.dtos.product.AddProductResponse;
 import com.hci.electric.dtos.product.EditProductRequest;
@@ -261,5 +263,50 @@ public class ProductController {
 
         return ResponseEntity.status(200).body(output);
 
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<DeleteResponse> detete(
+        @PathVariable("id") String id,
+        HttpServletRequest httpServletRequest) {
+        DeleteResponse response = new DeleteResponse();
+
+        String accessToken = httpServletRequest.getHeader("Authorization");
+        Account account = this.auth.checkToken(accessToken);
+
+        if (account == null) {
+            response.setMessage("You are not log in.");
+            return ResponseEntity.status(401).body(response);
+        }
+
+        if (!account.getRole().toLowerCase().equals("admin")) {
+            response.setMessage("You don't have permission to delete this resource.");
+            return ResponseEntity.status(403).body(response);
+        }
+
+        if (id == null) {
+            response.setMessage("Please specify a product.");
+            return ResponseEntity.status(400).body(response);
+        }
+
+        List<ProductDetail> productDetails = this.productDetailService.getByProductId(id);
+
+        if (productDetails.size() > 0) {
+            response.setMessage("This product already have details.");
+            return ResponseEntity.status(400).body(response);
+        }
+
+        String deletedId = this.productService.delete(id);
+
+        if (deletedId == null) {
+            response.setMessage("Internal Server Error.");
+            return ResponseEntity.status(500).body(response);
+        }
+
+        response.setStatus(true);
+        response.setMessage("Delete successfully.");
+        response.setId(deletedId);
+
+        return ResponseEntity.status(200).body(response);
     }
 }

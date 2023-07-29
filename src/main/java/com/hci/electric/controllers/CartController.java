@@ -258,14 +258,17 @@ public class CartController {
     @GetMapping("/user")
     public ResponseEntity<CartResponse> getCurrentUserCart(
         HttpServletRequest httpServletRequest,
+        @RequestParam(required = false) String id,
         HttpServletResponse httpServletResponse) {
         
-        String userId = null;
-        Cookie cookie = WebUtils.getCookie(httpServletRequest, "userId");
+        String userId = id;
+
+        // Cookie cookie = WebUtils.getCookie(httpServletRequest, "userId");
         
-        if (cookie != null) {
-            userId = cookie.getValue();
-        }
+        // if (cookie != null) {
+        //     userId = cookie.getValue();
+        // }
+        
 
         String username = userId;
         String accessToken = httpServletRequest.getHeader("Authorization");
@@ -279,6 +282,8 @@ public class CartController {
                 userCookie.setMaxAge(180 * 24 * 60 * 60);
                 userCookie.setHttpOnly(true);
                 userCookie.setPath("/");
+                userCookie.setSecure(true);
+
                 httpServletResponse.addCookie(userCookie);
 
                 username = annonymousUser.toString();
@@ -394,14 +399,15 @@ public class CartController {
         HttpServletResponse httpServletResponse) {
 
         String accessToken = httpServletRequest.getHeader("Authorization");
-        String userId = null;
-        Cookie cookie = WebUtils.getCookie(httpServletRequest, "userId");
-        
-        if (cookie != null) {
-            userId = cookie.getValue();
-        }
+        // String userId = null;
 
-        String user = this.getOrSetCartCookieAndUserId(accessToken, userId, httpServletResponse);
+        // Cookie cookie = WebUtils.getCookie(httpServletRequest, "userId");
+        
+        // if (cookie != null) {
+        //     userId = cookie.getValue();
+        // }
+
+        String user = this.getOrSetCartCookieAndUserId(accessToken, request.getUserId(), httpServletResponse);
         ProductDetail product = this.productDetailService.getById(request.getProductId());
 
         if (product == null) {
@@ -443,7 +449,11 @@ public class CartController {
             if (item.getProductId().equals(productId) ) {
                 item.setQuantity(item.getQuantity() + quantity);
                 this.cartItemService.edit(item);
-                
+
+                if (item.getQuantity() <= 0) {
+                    this.cartItemService.delete(item);
+                }
+
                 isNewItem = false;
                 break;
             }
@@ -532,7 +542,10 @@ public class CartController {
                 Cookie cookie = new Cookie("userId", anonymousUser.toString());
 
                 cookie.setMaxAge(180 * 24 * 60 * 60);
+                cookie.setPath("/");
+                cookie.setSecure(true);
                 cookie.setHttpOnly(true);
+                cookie.setDomain("hciuipro.com");
                 httpServletResponse.addCookie(cookie);
 
                 return anonymousUser.toString();

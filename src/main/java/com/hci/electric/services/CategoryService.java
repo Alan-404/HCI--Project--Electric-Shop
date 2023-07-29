@@ -11,4 +11,5 @@ public interface CategoryService {
     public List<Category> getAll();
     public boolean checkListCategories(List<String> categories);
     public List<Category> paginate(int num, int page);
+    public String delete(String id);
 }

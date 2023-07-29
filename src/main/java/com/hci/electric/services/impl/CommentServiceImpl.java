@@ -81,4 +81,33 @@ public class CommentServiceImpl implements CommentService {
             return null;
         }
     }
+
+    @Override
+    public Comment getById(String id) {
+        try {
+            Optional<Comment> comment = this.commentRepository.findById(id);
+            
+            if (comment.isPresent()) {
+                return comment.get();
+            }
+
+            return null;
+        } catch(Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public Comment edit(Comment comment) {
+        try {
+            comment.setModifiedAt(new Timestamp(System.currentTimeMillis()));
+
+            return this.commentRepository.save(comment);
+        }
+        catch(Exception exception) {
+            exception.printStackTrace();
+            return null;
+        }
+    }
 }

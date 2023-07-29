@@ -1,6 +1,7 @@
 package com.hci.electric.services.impl;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -87,6 +88,28 @@ public class ProductServiceImpl implements ProductService {
         catch(Exception exception){
             exception.printStackTrace();
             return null;
+        }
+    }
+
+    @Override
+    public String delete(String id) {
+        try {
+            this.productRepository.deleteById(id);
+
+            return id;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public List<Product> getByDistributorId(String distributorId) {
+        try {
+            return this.productRepository.findByDistributorId(distributorId);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return new ArrayList<>();
         }
     }
 }

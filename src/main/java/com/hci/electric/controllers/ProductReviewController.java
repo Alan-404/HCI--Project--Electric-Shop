@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,6 +22,8 @@ import com.algolia.search.SearchClient;
 import com.algolia.search.SearchIndex;
 import com.hci.electric.dtos.productDetail.ProductDetailResponse;
 import com.hci.electric.dtos.review.AddReviewRequest;
+import com.hci.electric.dtos.review.EditReviewRequest;
+import com.hci.electric.dtos.review.EditReviewResponse;
 import com.hci.electric.dtos.review.ProductReviewResponse;
 import com.hci.electric.dtos.review.ProductReviewsWithStats;
 import com.hci.electric.dtos.review.RatingStat;
@@ -153,7 +156,9 @@ public class ProductReviewController {
 
 
         int numberOfReviews = item.getNumReviews() + 1;
-        item.setAverageRating((item.getAverageRating() * item.getNumReviews()) / numberOfReviews + review.getStars() / numberOfReviews);
+        float oldRating = (item.getAverageRating() * item.getNumReviews()) / (float)numberOfReviews;
+
+        item.setAverageRating(oldRating + review.getStars() / (float)numberOfReviews);
         item.setNumReviews(numberOfReviews);
 
         ProductReview record = new ProductReview();
@@ -228,5 +233,92 @@ public class ProductReviewController {
         ProductReviewsWithStats productReviewsWithStats = new ProductReviewsWithStats(responses, stats);
 
         return ResponseEntity.status(200).body(productReviewsWithStats);
+    }
+
+    @PutMapping("/edit")
+    public ResponseEntity<EditReviewResponse> edit(
+        @RequestBody EditReviewRequest request,
+        HttpServletRequest httpServletRequest) {
+        
+        EditReviewResponse response = new EditReviewResponse();
+        String token = httpServletRequest.getHeader("Authorization");
+        Account account = this.auth.checkToken(token);
+
+        if (account == null) {
+            response.setMessage("You are not log in.");
+            return ResponseEntity.status(401).body(response);
+        }
+
+        ProductReview review = this.productReviewService.getById(request.getId());
+
+        if (review == null) {
+            response.setMessage("Review not found.");
+            return ResponseEntity.status(400).body(response);
+        }
+
+        if (!review.getUserId().equals(account.getUserId())) {
+            response.setMessage("You are not the owner of the review.");
+            return ResponseEntity.status(403).body(response);
+        }
+
+        float oldRating = review.getStars();
+        review.setContent(request.getContent());
+        review.setStars(request.getStars());
+
+        ProductReview editedReview = this.productReviewService.edit(review);
+
+        if (editedReview == null) {
+            response.setMessage("Internal Server Error.");
+            return ResponseEntity.status(500).body(response);
+        }
+
+        ProductDetail productDetail = this.productDetailService.getById(editedReview.getProductId());
+
+        if (productDetail != null) {
+            float rating = productDetail.getAverageRating() -
+                oldRating / (float)productDetail.getNumReviews() +
+                request.getStars() / (float)productDetail.getNumReviews();
+            
+            productDetail.setAverageRating(rating);
+            this.productDetailService.edit(productDetail);
+        }
+
+        ProductReviewResponse reviewResponse = this.modelMapper.map(editedReview, ProductReviewResponse.class);
+        User reviewer = this.userService.getById(editedReview.getUserId());
+        ReviewerResponse reviewerResponse = this.modelMapper.map(reviewer, ReviewerResponse.class);
+        
+        reviewResponse.setReviewer(reviewerResponse);
+
+        ProductDetailResponse algoliaResponse = this.modelMapper.map(productDetail, ProductDetailResponse.class);
+        Product productOrigin = this.productService.getById(productDetail.getProductId());
+        Discount discount = this.discountService.getByProductId(productDetail.getId());
+        Distributor brand = this.brandService.getById(productOrigin.getDistributorId());
+        List<ProductCategory> pcList = this.productCategoryService.getByProductId(productOrigin.getId());
+        List<String> categories = new ArrayList<>();
+        List<ProductImage> images = this.productImageService.getMediaByProduct(productDetail.getId());
+
+        for (ProductCategory pc : pcList) {
+            Category category = this.categoryService.getById(pc.getCategoryId());
+            categories.add(category.getName());
+        }
+
+        algoliaResponse.setBrand(brand.getName());
+        algoliaResponse.setCategories(categories);
+        algoliaResponse.setDiscount(discount.getValue());
+        algoliaResponse.setImage(images.get(0).getLink());
+        algoliaResponse.setName(productOrigin.getName() + " " +
+            productDetail.getSpecifications() + " " + Color.COLORS[productDetail.getColor()]);
+        algoliaResponse.setObjectID(productDetail.getId());
+        algoliaResponse.setColor(Color.COLORS[productDetail.getColor()]);
+
+        SearchClient client = DefaultSearchClient.create(this.algoliaAppId, this.algoliaApiKey);
+        SearchIndex<ProductDetailResponse> index = client.initIndex("hci_proj", ProductDetailResponse.class);
+        index.saveObject(algoliaResponse);
+
+        response.setReview(reviewResponse);
+        response.setStatus(true);
+        response.setMessage("Edit successfully.");
+
+        return ResponseEntity.status(200).body(response);
     }
 }

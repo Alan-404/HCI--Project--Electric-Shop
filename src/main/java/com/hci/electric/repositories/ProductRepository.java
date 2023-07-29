@@ -12,4 +12,7 @@ import com.hci.electric.utils.queries.ProductQuery;
 public interface ProductRepository extends JpaRepository<Product, String> {
     @Query(value = ProductQuery.queryPaginateProducts, nativeQuery = true)
     public Optional<List<Product>> paginate(int limit, int offset);
+
+    @Query(value = ProductQuery.queryFindByDistributorId, nativeQuery = true)
+    public List<Product> findByDistributorId(String distributorId);
 }

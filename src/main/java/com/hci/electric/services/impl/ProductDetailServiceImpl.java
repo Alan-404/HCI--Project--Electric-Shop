@@ -121,4 +121,16 @@ public class ProductDetailServiceImpl implements ProductDetailService {
             return new ArrayList<>();
         }
     }
+
+    @Override
+    public String delete(String id) {
+        try {
+            this.productDetailRepository.deleteById(id);
+
+            return id;
+        } catch(Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
 }

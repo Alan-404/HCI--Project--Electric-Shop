@@ -110,4 +110,16 @@ public class CategoryServiceImpl implements CategoryService {
             return null;
         }
     }
+
+    @Override
+    public String delete(String id) {
+        try {
+            this.categoryRepository.deleteById(id);
+
+            return id;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
 }

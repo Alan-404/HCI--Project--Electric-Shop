@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,6 +21,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.algolia.search.DefaultSearchClient;
 import com.algolia.search.SearchClient;
 import com.algolia.search.SearchIndex;
+import com.hci.electric.dtos.bill.OrderItem;
+import com.hci.electric.dtos.common.DeleteResponse;
 import com.hci.electric.dtos.productDetail.AddProductItemRequest;
 import com.hci.electric.dtos.productDetail.AddProductRequest;
 import com.hci.electric.dtos.productDetail.DetailItem;
@@ -521,6 +524,10 @@ public class ProductDetailController {
             for (ProductCategory pc : pcList) {
                 Product origin = this.productService.getById(pc.getProductId());
 
+                if (origin == null) {
+                    continue;
+                }
+
                 List<ProductDetail> productDetails = this.productDetailService.getByProductId(origin.getId());
 
                 for (ProductDetail pd : productDetails) {     
@@ -557,5 +564,60 @@ public class ProductDetailController {
 
 
         return ResponseEntity.status(200).body(responses);
+    }
+
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<DeleteResponse> detete(
+        @PathVariable("id") String id,
+        HttpServletRequest httpServletRequest) {
+        DeleteResponse response = new DeleteResponse();
+
+        String accessToken = httpServletRequest.getHeader("Authorization");
+        Account account = this.auth.checkToken(accessToken);
+
+        if (account == null) {
+            response.setMessage("You are not log in.");
+            return ResponseEntity.status(401).body(response);
+        }
+
+        if (!account.getRole().toLowerCase().equals("admin")) {
+            response.setMessage("You don't have permission to delete this resource.");
+            return ResponseEntity.status(403).body(response);
+        }
+
+        if (id == null) {
+            response.setMessage("Please specify a product detail.");
+            return ResponseEntity.status(400).body(response);
+        }
+
+        List<Order> orders = this.orderService.getByProductId(id);
+
+        if (orders.size() > 0) {
+            response.setMessage("Customers already ordered this product.");
+            return ResponseEntity.status(400).body(response);
+        }
+
+        String deletedId = this.productDetailService.delete(id);
+
+        if (deletedId == null) {
+            response.setMessage("Internal Server Error.");
+            return ResponseEntity.status(500).body(response);
+        }
+
+        List<ProductImage> images = this.productImageService.getMediaByProduct(id);
+
+        if (images.size() > 0) {
+            SearchClient client = DefaultSearchClient.create(this.algoliaAppId, this.algoliaApiKey);
+            SearchIndex<ProductDetailResponse> index = client.initIndex("hci_proj", ProductDetailResponse.class);
+
+            index.deleteObject(id);
+        }
+
+        response.setStatus(true);
+        response.setMessage("Delete successfully.");
+        response.setId(deletedId);
+
+        return ResponseEntity.status(200).body(response);
     }
 }
