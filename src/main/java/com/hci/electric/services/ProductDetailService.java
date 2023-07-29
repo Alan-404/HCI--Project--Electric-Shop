@@ -12,4 +12,5 @@ public interface ProductDetailService {
     public List<ProductDetail> paginate(int page, int num);
     public ProductDetail edit(ProductDetail product);
     public List<ProductDetail> getBestSellers();
+    public String delete(String id);
 }

@@ -10,4 +10,6 @@ public interface ProductService {
     public List<Product> getAll();
     public List<Product> paginate(int num, int page);
     public Product edit(Product product);
+    public String delete(String id);
+    public List<Product> getByDistributorId(String distributorId);
 }

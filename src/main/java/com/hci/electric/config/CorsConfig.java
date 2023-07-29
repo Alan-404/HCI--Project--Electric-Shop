@@ -10,7 +10,13 @@ public class CorsConfig implements WebMvcConfigurer {
     {
         registry.addMapping("/**")
         .allowedMethods("PUT", "DELETE", "POST", "GET", "OPTIONS")
-        .allowedOrigins("http://localhost:5173", "http://localhost:80", "http://20.244.4.233")
+        .allowedOrigins(
+            "http://localhost:5173",
+            "https://hcielectronic.mooo.com",
+            "http://hci-fe.azurewebsites.net",
+            "https://hci-fe.azurewebsites.net",
+            "http://hci-ui.azurewebsites.net",
+            "https://hci-ui.azurewebsites.net")
         .allowedHeaders("*")
         .allowCredentials(true);
     }

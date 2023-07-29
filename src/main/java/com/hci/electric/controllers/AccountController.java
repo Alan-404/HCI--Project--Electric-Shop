@@ -62,43 +62,57 @@ public class AccountController {
             @RequestBody LoginRequest request,
             HttpServletRequest httpServletRequest,
             HttpServletResponse httpServletResponse) {
+        LoginResponse response = new LoginResponse(false, null, null, null);
         User  user = this.userService.getByEmail(request.getEmail());
-        if(user == null){
-            return ResponseEntity.status(404).body(new LoginResponse(false, "Not found user", ""));
+        
+        if(user == null) {
+            response.setMessage("User not found.");
+            return ResponseEntity.status(404).body(response);
         }
 
         Account account = this.accountService.getByUserId(user.getId());
-        if(account == null){
-            return ResponseEntity.status(500).body(new LoginResponse(false, "Internal Error Server", ""));
+        if (account == null) {
+            response.setMessage("Internal Error Server");
+            return ResponseEntity.status(500).body(response);
         }
         
-        if(this.accountService.checkPassword(request.getPassword(), account.getPassword()) == false){
-            return ResponseEntity.status(404).body(new LoginResponse(false, "Incorrect Password", ""));
+        if (this.accountService.checkPassword(request.getPassword(), account.getPassword()) == false){
+            response.setMessage("Incorrect Password");
+            return ResponseEntity.status(404).body(response);
         }
+
         String accessToken = this.jwt.generateToken(account.getId());
 
         String anonymouseId = null;
-        Cookie cookie = WebUtils.getCookie(httpServletRequest, "userId");
+        // Cookie cookie = WebUtils.getCookie(httpServletRequest, "userId");
         
         
 
-        if (cookie != null) {
-            anonymouseId = cookie.getValue();
-            Cookie newCookie = new Cookie("userId", user.getId());
-            newCookie.setMaxAge(180 * 24 * 60 * 60);
-            newCookie.setPath("/");
-            newCookie.setHttpOnly(true);
+        // if (cookie != null) {
+        //     anonymouseId = cookie.getValue();
+        //     Cookie newCookie = new Cookie("userId", user.getId());
+        //     newCookie.setMaxAge(180 * 24 * 60 * 60);
+        //     newCookie.setPath("/");
+        //     newCookie.setSecure(true);
+        //     newCookie.setHttpOnly(true);
+        //     newCookie.setDomain("hciuipro.com");
+        //     if (anonymouseId != null) {
+        //         transferBasket(anonymouseId, user.getId());
+        //     }
 
-            if (anonymouseId != null) {
-                transferBasket(anonymouseId, user.getId());
-            }
+        //     httpServletResponse.addCookie(newCookie);
+        // }
 
-            httpServletResponse.addCookie(newCookie);
+        if (request.getUserCartId() != null) {
+            
+            transferBasket(request.getUserCartId(), user.getId());
         }
 
        
- 
-        return ResponseEntity.status(200).body(new LoginResponse(true, "Login Successfully", accessToken));
+        response.setMessage("Login successfully");
+        response.setAccessToken(accessToken);
+        response.setUserId(account.getUserId());
+        return ResponseEntity.status(200).body(response);
 
     }
 
@@ -143,12 +157,12 @@ public class AccountController {
     }
 
 
-    private void transferBasket(String anonymouseId, String userId) {
-        if (anonymouseId.equals(userId)) {
+    private void transferBasket(String anonymousId, String userId) {
+        if (anonymousId.equals(userId)) {
             return;
         }
 
-        Cart anonymousCart = this.cartService.getByUserId(anonymouseId);
+        Cart anonymousCart = this.cartService.getByUserId(anonymousId);
         if (anonymousCart == null) {
             return;
         }
@@ -180,7 +194,7 @@ public class AccountController {
             }
 
             if (isNewItem) {
-                anonymousItem.setCartId(userId);
+                anonymousItem.setCartId(userCart.getId());
                 this.cartItemService.edit(anonymousItem);
             }
         }

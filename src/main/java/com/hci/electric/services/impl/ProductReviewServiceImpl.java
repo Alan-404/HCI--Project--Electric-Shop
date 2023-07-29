@@ -63,4 +63,31 @@ public class ProductReviewServiceImpl implements ProductReviewService {
             return 0;
         }
     }
+
+    @Override
+    public ProductReview getById(String id) {
+        try {
+            Optional<ProductReview> review = this.productReviewRepository.findById(id);
+
+            if (review.isPresent()) {
+                return review.get();
+            }
+
+            return null;
+        } catch(Exception ex) {
+            ex.printStackTrace();
+
+            return null;
+        }
+    }
+
+    @Override
+    public ProductReview edit(ProductReview review) {
+        try {
+            return this.productReviewRepository.save(review);
+        } catch(Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
 }

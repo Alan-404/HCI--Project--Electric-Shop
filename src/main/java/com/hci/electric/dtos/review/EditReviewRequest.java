@@ -1,4 +1,4 @@
-package com.hci.electric.dtos.account;
+package com.hci.electric.dtos.review;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,8 +9,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoginRequest {
-    private String email;
-    private String password;
-    private String userCartId;
+public class EditReviewRequest {
+    private String id;
+    private int stars;
+    private String content;
 }

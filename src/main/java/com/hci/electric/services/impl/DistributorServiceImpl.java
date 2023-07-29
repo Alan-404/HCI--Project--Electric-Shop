@@ -77,4 +77,15 @@ public class DistributorServiceImpl implements DistributorService {
             return new ArrayList<>();
         }
     }
+
+    @Override
+    public String delete(String id) {
+        try {
+            this.distributorRepository.deleteById(id);
+            return id;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
 }

@@ -1,0 +1,10 @@
+version: '3.7'
+services:
+  backend:
+    image: nsioay/hci-be-2:latest
+    ports:
+      - "8080:8080"
+  stripe-cli:
+    image: stripe/stripe-cli
+    command: "listen --api-key sk_test_51JNerUA5N5of65pzn50kAjVR263E4LabFJ1gZcdR1j16WzjbfW7cc7w3JYfwSVgxu7AsTYGk3uV9FSYfrkPDSeCW00ES4vT7ux --forward-to backend:8080/stripe/webhook"
+

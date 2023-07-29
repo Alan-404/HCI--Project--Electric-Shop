@@ -1,17 +1,17 @@
-package com.hci.electric.dtos.account;
+package com.hci.electric.dtos.common;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoginResponse {
-    private Boolean success = false;
+public class DeleteResponse {
+    private String id = null;
     private String message = "";
-    private String accessToken = "";
-    private String userId = null;
+    private boolean status = false;
 }

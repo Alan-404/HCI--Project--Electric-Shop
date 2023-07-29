@@ -68,8 +68,8 @@ public class UserController {
             return ResponseEntity.status(400).body(new RegisterResponse(false, "Email has been taken", null));
         }
 
-        if (request.getPhone() != null){
-            if (this.userService.getByPhone(request.getPhone()) != null){
+        if (request.getPhone() != null) {
+            if (this.userService.getByPhone(request.getPhone()) != null) {
                 return ResponseEntity.status(400).body(new RegisterResponse(false, "Phone Number has been used", null));
             } 
         }
@@ -78,32 +78,37 @@ public class UserController {
         Account account = this.modelMapper.map(request, Account.class);
 
         User savedUser = this.userService.save(user);
-        if(savedUser == null){
+        if(savedUser == null) {
             return ResponseEntity.status(500).body(new RegisterResponse(false, "Internal Error Server", null));
+        }
+
+        if (request.getRole() == null) {
+            account.setRole("user");
         }
 
         account.setUserId(savedUser.getId());
         Account savedAccount = this.accountService.save(account);
-        if(savedAccount == null){
+        if(savedAccount == null) {
             return ResponseEntity.status(500).body(new RegisterResponse(false, "Internal Error Server", null));
         }
 
-        String anonymouseId = null;
-        Cookie cookie = WebUtils.getCookie(httpServletRequest, "userId");
+        // String anonymouseId = null;
+        // Cookie cookie = WebUtils.getCookie(httpServletRequest, "userId");
 
-        if (cookie != null) {
-            anonymouseId = cookie.getValue();
-            Cookie newCookie = new Cookie("userId", user.getId());
-            newCookie.setMaxAge(180 * 24 * 60 * 60);
-            newCookie.setPath("/");
-            newCookie.setHttpOnly(true);
+        // if (cookie != null) {
+        //     anonymouseId = cookie.getValue();
+        //     Cookie newCookie = new Cookie("userId", user.getId());
+        //     newCookie.setMaxAge(180 * 24 * 60 * 60);
+        //     newCookie.setPath("/");
+        //     newCookie.setSecure(true);
+        //     newCookie.setHttpOnly(true);
+        //     newCookie.setDomain("hciuipro.com");
+        //     if (anonymouseId != null) {
+        //         transferBasket(anonymouseId, user.getId());
+        //     }
 
-            if (anonymouseId != null) {
-                transferBasket(anonymouseId, user.getId());
-            }
-
-            httpServletResponse.addCookie(newCookie);
-        }
+        //     httpServletResponse.addCookie(newCookie);
+        // }
 
         return ResponseEntity.status(200).body(new RegisterResponse(true, "Register User Successfully", savedUser));
     }
@@ -121,13 +126,17 @@ public class UserController {
         user.setId(account.getUserId());
         user.setCreatedAt(oldDataUser.getCreatedAt());
         user.setEmail(oldDataUser.getEmail());
+
+        if (request.getAvatar() == null) {
+            user.setAvatar(oldDataUser.getAvatar());
+        }
+
         User savedUser = this.userService.edit(user);
         if(savedUser == null){
             return ResponseEntity.status(500).body(null);
         }
 
         return ResponseEntity.status(200).body(savedUser);
-
     }
 
     @GetMapping("/info")
@@ -167,50 +176,5 @@ public class UserController {
         }
 
         return ResponseEntity.status(200).body(usersInfor);
-    }
-
-
-    private void transferBasket(String anonymouseId, String userId) {
-        if (anonymouseId.equals(userId)) {
-            return;
-        }
-
-        Cart anonymousCart = this.cartService.getByUserId(anonymouseId);
-        if (anonymousCart == null) {
-            return;
-        }
-
-        Cart userCart = this.cartService.getByUserId(userId);
-
-        if (userCart == null) {
-            anonymousCart.setUserId(userId);
-            this.cartService.edit(anonymousCart);
-
-            return;
-        }
-
-        List<CartItem> anonymouseCartItems = this.cartItemService.getAllItemsByCart(anonymousCart.getId());
-        List<CartItem> userCartItems = this.cartItemService.getAllItemsByCart(userCart.getId());
-
-        for (CartItem anonymousItem : anonymouseCartItems) {
-            boolean isNewItem = true;
-            
-            for (CartItem userItem : userCartItems) {
-                if (anonymousItem.getProductId().equals(userItem.getProductId())) {
-                    userItem.setQuantity(userItem.getQuantity() + anonymousItem.getQuantity());
-                    this.cartItemService.edit(userItem);
-                    this.cartItemService.delete(anonymousItem);
-                    isNewItem = false;
-
-                    break;
-                }
-            }
-
-            if (isNewItem) {
-                anonymousItem.setCartId(userId);
-                this.cartItemService.edit(anonymousItem);
-            }
-        }
-
     }
 }

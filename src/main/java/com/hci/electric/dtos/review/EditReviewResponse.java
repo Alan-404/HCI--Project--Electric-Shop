@@ -1,4 +1,4 @@
-package com.hci.electric.dtos.account;
+package com.hci.electric.dtos.review;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,9 +9,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoginResponse {
-    private Boolean success = false;
+public class EditReviewResponse {
+    private boolean status = false;
     private String message = "";
-    private String accessToken = "";
-    private String userId = null;
+    private ProductReviewResponse review = null;
 }

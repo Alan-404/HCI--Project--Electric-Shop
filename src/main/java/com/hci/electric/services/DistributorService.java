@@ -9,4 +9,5 @@ public interface DistributorService {
     public Distributor getByUserId(String userId);
     public Distributor getById(String id);
     public List<Distributor> getAll();
+    public String delete(String id);
 }

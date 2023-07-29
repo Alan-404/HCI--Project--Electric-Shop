@@ -1,13 +1,13 @@
-@host=http://localhost:8080
+@host=https://hci-be.azurewebsites.net
 
 POST {{host}}/user/api
 Content-Type: application/json
 
 {
-    "firstName": "Hoa",
-    "lastName": "Vy",
-    "phone": "001293921",
-    "email": "hoavy@gmail.com",
+    "firstName": "Hci",
+    "lastName": "Admin",
+    "phone": "0912399213",
+    "email": "admin@gmail.com",
     "gender": "Male",
     "address": "Thu Duc, Ho Chi Minh, Vietnam",
     "birthDate": "2001-05-07",
